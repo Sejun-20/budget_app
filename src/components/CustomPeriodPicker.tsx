@@ -1,0 +1,66 @@
+import { weeksInMonth, type CustomPeriod } from "@/lib/period";
+
+const CURRENT_YEAR = new Date().getFullYear();
+const YEAR_OPTIONS = Array.from({ length: 11 }, (_, i) => CURRENT_YEAR - i);
+const MONTH_OPTIONS = Array.from({ length: 12 }, (_, i) => i + 1);
+
+function formatWeekLabel(weekStart: string): string {
+  const [y, m, d] = weekStart.split("-").map(Number);
+  const monday = new Date(Date.UTC(y, m - 1, d));
+  const sunday = new Date(monday);
+  sunday.setUTCDate(monday.getUTCDate() + 6);
+  const fmt = (dt: Date) => `${dt.getUTCMonth() + 1}/${dt.getUTCDate()}`;
+  return `${fmt(monday)} ~ ${fmt(sunday)}`;
+}
+
+export default function CustomPeriodPicker({
+  value,
+  onChange,
+}: {
+  value: CustomPeriod;
+  onChange: (c: CustomPeriod) => void;
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-2 rounded border border-zinc-200 p-3 dark:border-zinc-800">
+      <select
+        value={value.year}
+        onChange={(e) => onChange({ year: Number(e.target.value) })}
+        className="rounded border border-zinc-300 px-2 py-1 text-xs dark:border-zinc-700 dark:bg-zinc-900"
+      >
+        {YEAR_OPTIONS.map((y) => (
+          <option key={y} value={y}>
+            {y}년
+          </option>
+        ))}
+      </select>
+
+      <select
+        value={value.month ?? ""}
+        onChange={(e) => onChange({ year: value.year, month: e.target.value ? Number(e.target.value) : undefined })}
+        className="rounded border border-zinc-300 px-2 py-1 text-xs dark:border-zinc-700 dark:bg-zinc-900"
+      >
+        <option value="">전체 (연간)</option>
+        {MONTH_OPTIONS.map((m) => (
+          <option key={m} value={m}>
+            {m}월
+          </option>
+        ))}
+      </select>
+
+      {value.month && (
+        <select
+          value={value.week ?? ""}
+          onChange={(e) => onChange({ year: value.year, month: value.month, week: e.target.value || undefined })}
+          className="rounded border border-zinc-300 px-2 py-1 text-xs dark:border-zinc-700 dark:bg-zinc-900"
+        >
+          <option value="">전체 (월간)</option>
+          {weeksInMonth(value.year, value.month).map((w) => (
+            <option key={w} value={w}>
+              {formatWeekLabel(w)}
+            </option>
+          ))}
+        </select>
+      )}
+    </div>
+  );
+}
