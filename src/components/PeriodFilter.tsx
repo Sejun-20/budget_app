@@ -33,7 +33,7 @@ export default function PeriodFilter({
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex flex-wrap gap-1 rounded border border-zinc-300 p-0.5 dark:border-zinc-700">
+      <div className="flex gap-1 rounded border border-zinc-300 p-0.5 dark:border-zinc-700">
         {quickOptions ? (
           quickOptions.map((q) => (
             <button
@@ -43,7 +43,7 @@ export default function PeriodFilter({
                 setCustomOpen(false);
                 onChange({ kind: "quick", value: q });
               }}
-              className={`rounded px-2.5 py-1 text-xs font-medium ${
+              className={`min-w-0 flex-1 rounded px-1 py-1 text-center text-xs font-medium ${
                 selection?.kind === "quick" && selection.value === q
                   ? "bg-black text-white dark:bg-white dark:text-black"
                   : "text-zinc-600 dark:text-zinc-400"
@@ -59,7 +59,7 @@ export default function PeriodFilter({
               setCustomOpen(false);
               onChange(null);
             }}
-            className={`rounded px-2.5 py-1 text-xs font-medium ${
+            className={`min-w-0 flex-1 rounded px-1 py-1 text-center text-xs font-medium ${
               selection === null
                 ? "bg-black text-white dark:bg-white dark:text-black"
                 : "text-zinc-600 dark:text-zinc-400"
@@ -71,7 +71,7 @@ export default function PeriodFilter({
         <button
           type="button"
           onClick={() => setCustomOpen((v) => !v)}
-          className={`rounded px-2.5 py-1 text-xs font-medium ${
+          className={`min-w-0 flex-1 rounded px-1 py-1 text-center text-xs font-medium ${
             isCustomActive ? "bg-black text-white dark:bg-white dark:text-black" : "text-zinc-600 dark:text-zinc-400"
           }`}
         >

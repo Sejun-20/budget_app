@@ -27,7 +27,7 @@ export default function CustomPeriodPicker({
       <select
         value={value.year}
         onChange={(e) => onChange({ year: Number(e.target.value) })}
-        className="min-w-0 shrink rounded border border-zinc-300 px-1 py-0.5 text-[10px] dark:border-zinc-700 dark:bg-zinc-900"
+        className="min-w-0 flex-1 rounded border border-zinc-300 px-1 py-0.5 text-[10px] dark:border-zinc-700 dark:bg-zinc-900"
       >
         {YEAR_OPTIONS.map((y) => (
           <option key={y} value={y}>
@@ -39,7 +39,7 @@ export default function CustomPeriodPicker({
       <select
         value={value.month ?? ""}
         onChange={(e) => onChange({ year: value.year, month: e.target.value ? Number(e.target.value) : undefined })}
-        className="min-w-0 shrink rounded border border-zinc-300 px-1 py-0.5 text-[10px] dark:border-zinc-700 dark:bg-zinc-900"
+        className="min-w-0 flex-1 rounded border border-zinc-300 px-1 py-0.5 text-[10px] dark:border-zinc-700 dark:bg-zinc-900"
       >
         <option value="">전체</option>
         {MONTH_OPTIONS.map((m) => (
@@ -53,7 +53,7 @@ export default function CustomPeriodPicker({
         <select
           value={value.week ?? ""}
           onChange={(e) => onChange({ year: value.year, month: value.month, week: e.target.value || undefined })}
-          className="min-w-0 shrink rounded border border-zinc-300 px-1 py-0.5 text-[10px] dark:border-zinc-700 dark:bg-zinc-900"
+          className="min-w-0 flex-1 rounded border border-zinc-300 px-1 py-0.5 text-[10px] dark:border-zinc-700 dark:bg-zinc-900"
         >
           <option value="">전체</option>
           {weeksInMonth(value.year, value.month).map((w) => (

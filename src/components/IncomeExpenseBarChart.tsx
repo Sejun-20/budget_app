@@ -36,10 +36,19 @@ export default function IncomeExpenseBarChart({ data }: { data: BarPoint[] }) {
   const isWide = data.length > 14;
   const chartWidth = isWide ? data.length * 44 : undefined;
 
+  // recharts centers the Legend over the chart's margin box, but only the
+  // left YAxis eats into that box — so the plot (bars/XAxis) sits visibly
+  // right of the Legend's center by half the YAxis width. Margins can't fix
+  // this (both the Legend and the plot read off the same margin box), so a
+  // second, invisible YAxis mirrors the real one's width on the right,
+  // making the plot itself symmetric within the margin box.
+  const Y_AXIS_WIDTH = 44;
+  const marginLeft = 8;
+
   const chart = (
     <BarChart
       data={data}
-      margin={{ top: 16, right: 8, left: 8, bottom: 0 }}
+      margin={{ top: 16, right: marginLeft, left: marginLeft, bottom: 0 }}
       {...(chartWidth ? { width: chartWidth, height: 260 } : {})}
     >
       <CartesianGrid stroke={GRID_COLOR} vertical={false} />
@@ -48,9 +57,10 @@ export default function IncomeExpenseBarChart({ data }: { data: BarPoint[] }) {
         stroke={AXIS_COLOR}
         tick={{ fill: MUTED_TEXT_COLOR, fontSize: 12 }}
         tickFormatter={formatAxisTick}
-        width={44}
+        width={Y_AXIS_WIDTH}
         tickLine={false}
       />
+      <YAxis yAxisId="mirror" orientation="right" width={Y_AXIS_WIDTH} tick={false} axisLine={false} tickLine={false} />
       <Legend />
       <Bar dataKey="income" name="수입" fill={INCOME_COLOR} radius={[3, 3, 0, 0]}>
         <LabelList dataKey="income" position="top" formatter={(v) => formatBarLabel(Number(v))} fontSize={10} fill={MUTED_TEXT_COLOR} />
