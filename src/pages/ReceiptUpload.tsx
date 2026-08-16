@@ -203,13 +203,13 @@ export default function ReceiptUpload() {
             />
           </label>
 
-          <label className="flex flex-col gap-1 overflow-x-hidden text-sm">
+          <label className="flex flex-col gap-1 text-sm">
             날짜
             <input
               type="date"
               value={queue[0].date}
               onChange={(e) => updateCurrentDraft({ date: e.target.value })}
-              className="w-full min-w-0 rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+              className="rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
             />
           </label>
 

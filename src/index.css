@@ -58,6 +58,15 @@ textarea {
   font-size: 16px;
 }
 
+/* iOS Safari's native date control has an intrinsic content width that
+   ignores `width: 100%` inside flex/grid layouts. Forcing an explicit
+   `width` (however small) switches it to used-value sizing, so the
+   following `min-width: 100%` then actually applies. */
+input[type="date"] {
+  width: 1px;
+  min-width: 100%;
+}
+
 /* Charts aren't interactive controls — remove the tap-highlight box and
    focus outline WebKit/Chrome draw on touch so tapping a slice/bar doesn't
    show a blue selection rectangle. */

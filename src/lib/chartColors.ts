@@ -15,11 +15,15 @@ const CATEGORY_COLOR_VARS = [
   "--chart-cat-6",
 ] as const;
 
+function colorOf(c: { color?: string; colorIndex: number }): string {
+  return c.color ?? `var(${CATEGORY_COLOR_VARS[c.colorIndex % CATEGORY_COLOR_VARS.length]})`;
+}
+
 export async function getExpenseCategoryColorMap(): Promise<Record<string, string>> {
   const categories = await getExpenseCategories();
   const map: Record<string, string> = {};
   for (const c of categories) {
-    map[c.name] = `var(${CATEGORY_COLOR_VARS[c.colorIndex % CATEGORY_COLOR_VARS.length]})`;
+    map[c.name] = colorOf(c);
   }
   return map;
 }
@@ -28,7 +32,7 @@ export async function getIncomeCategoryColorMap(): Promise<Record<string, string
   const categories = await getIncomeCategoryEntries();
   const map: Record<string, string> = {};
   for (const c of categories) {
-    map[c.name] = `var(${CATEGORY_COLOR_VARS[c.colorIndex % CATEGORY_COLOR_VARS.length]})`;
+    map[c.name] = colorOf(c);
   }
   return map;
 }

@@ -23,11 +23,11 @@ export default function CustomPeriodPicker({
   showWeek?: boolean;
 }) {
   return (
-    <div className="flex flex-nowrap items-center gap-1 overflow-x-auto rounded border border-zinc-200 p-2 dark:border-zinc-800">
+    <div className="flex flex-nowrap items-center gap-1 rounded border border-zinc-200 p-1.5 dark:border-zinc-800">
       <select
         value={value.year}
         onChange={(e) => onChange({ year: Number(e.target.value) })}
-        className="shrink-0 rounded border border-zinc-300 px-1.5 py-1 text-[11px] dark:border-zinc-700 dark:bg-zinc-900"
+        className="min-w-0 shrink rounded border border-zinc-300 px-1 py-0.5 text-[10px] dark:border-zinc-700 dark:bg-zinc-900"
       >
         {YEAR_OPTIONS.map((y) => (
           <option key={y} value={y}>
@@ -39,9 +39,9 @@ export default function CustomPeriodPicker({
       <select
         value={value.month ?? ""}
         onChange={(e) => onChange({ year: value.year, month: e.target.value ? Number(e.target.value) : undefined })}
-        className="shrink-0 rounded border border-zinc-300 px-1.5 py-1 text-[11px] dark:border-zinc-700 dark:bg-zinc-900"
+        className="min-w-0 shrink rounded border border-zinc-300 px-1 py-0.5 text-[10px] dark:border-zinc-700 dark:bg-zinc-900"
       >
-        <option value="">전체(연간)</option>
+        <option value="">전체</option>
         {MONTH_OPTIONS.map((m) => (
           <option key={m} value={m}>
             {m}월
@@ -53,9 +53,9 @@ export default function CustomPeriodPicker({
         <select
           value={value.week ?? ""}
           onChange={(e) => onChange({ year: value.year, month: value.month, week: e.target.value || undefined })}
-          className="shrink-0 rounded border border-zinc-300 px-1.5 py-1 text-[11px] dark:border-zinc-700 dark:bg-zinc-900"
+          className="min-w-0 shrink rounded border border-zinc-300 px-1 py-0.5 text-[10px] dark:border-zinc-700 dark:bg-zinc-900"
         >
-          <option value="">전체(월간)</option>
+          <option value="">전체</option>
           {weeksInMonth(value.year, value.month).map((w) => (
             <option key={w} value={w}>
               {formatWeekLabel(w)}

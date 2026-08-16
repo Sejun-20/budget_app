@@ -12,8 +12,10 @@ import {
   renameExpenseCategory,
   deleteExpenseCategory,
   categoryHasTransactions,
+  setIncomeCategoryColor,
+  setExpenseCategoryColor,
 } from "@/lib/categories";
-import { getExpenseCategoryColorMap } from "@/lib/chartColors";
+import { getExpenseCategoryColorMap, getIncomeCategoryColorMap } from "@/lib/chartColors";
 import CategoryManager from "@/components/CategoryManager";
 import HomeLink from "@/components/HomeLink";
 
@@ -29,16 +31,19 @@ export default function Settings() {
   const [incomeCategories, setIncomeCategories] = useState<string[]>([]);
   const [expenseCategories, setExpenseCategories] = useState<string[]>([]);
   const [expenseColorMap, setExpenseColorMap] = useState<Record<string, string>>({});
+  const [incomeColorMap, setIncomeColorMap] = useState<Record<string, string>>({});
 
   async function reloadCategories() {
-    const [income, expense, colorMap] = await Promise.all([
+    const [income, expense, expenseColors, incomeColors] = await Promise.all([
       getIncomeCategories(),
       getExpenseCategories(),
       getExpenseCategoryColorMap(),
+      getIncomeCategoryColorMap(),
     ]);
     setIncomeCategories(income);
     setExpenseCategories(expense.map((c) => c.name));
-    setExpenseColorMap(colorMap);
+    setExpenseColorMap(expenseColors);
+    setIncomeColorMap(incomeColors);
   }
 
   useEffect(() => {
@@ -170,12 +175,17 @@ export default function Settings() {
           await deleteExpenseCategory(name);
           await reloadCategories();
         }}
+        onColorChange={async (name, color) => {
+          await setExpenseCategoryColor(name, color);
+          await reloadCategories();
+        }}
       />
 
       <CategoryManager
         title="수입 카테고리"
         description="수입 입력에 사용되는 카테고리입니다. 이름을 바꾸면 기존 내역에도 함께 반영되고, 삭제해도 기존 내역의 카테고리 표시는 그대로 유지됩니다."
         categories={incomeCategories}
+        colorFor={(name) => incomeColorMap[name] ?? "var(--chart-text-muted)"}
         checkHistory={(name) => categoryHasTransactions("income", name)}
         onAdd={async (name) => {
           await addIncomeCategory(name);
@@ -187,6 +197,10 @@ export default function Settings() {
         }}
         onDelete={async (name) => {
           await deleteIncomeCategory(name);
+          await reloadCategories();
+        }}
+        onColorChange={async (name, color) => {
+          await setIncomeCategoryColor(name, color);
           await reloadCategories();
         }}
       />

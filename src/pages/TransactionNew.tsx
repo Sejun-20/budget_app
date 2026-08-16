@@ -138,13 +138,13 @@ export default function TransactionNew() {
           />
         </label>
 
-        <label className="flex w-full min-w-0 flex-col gap-1 overflow-x-hidden text-sm">
+        <label className="flex w-full min-w-0 flex-col gap-1 text-sm">
           날짜
           <input
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="w-full min-w-0 rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+            className="rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
             required
           />
         </label>

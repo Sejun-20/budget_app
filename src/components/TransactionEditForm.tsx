@@ -135,7 +135,7 @@ export default function TransactionEditForm({
         type="date"
         value={date}
         onChange={(e) => setDate(e.target.value)}
-        className="w-full min-w-0 overflow-x-hidden rounded border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+        className="rounded border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
         required
       />
 

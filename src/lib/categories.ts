@@ -4,8 +4,10 @@ export interface CategoryEntry {
   name: string;
   /** Stable slot into the validated 6-color categorical palette (chartColors.ts),
    * assigned once at creation so deleting/adding other categories never
-   * repaints this one. */
+   * repaints this one. Ignored once `color` is set. */
   colorIndex: number;
+  /** Hex color the user picked explicitly, overriding `colorIndex`. */
+  color?: string;
 }
 
 /** @deprecated kept as an alias for existing imports */
@@ -136,6 +138,16 @@ export async function deleteExpenseCategory(name: string): Promise<void> {
   const list = await getExpenseCategories();
   if (list.length <= 1) return;
   await saveExpenseCategories(list.filter((c) => c.name !== name));
+}
+
+export async function setIncomeCategoryColor(name: string, color: string): Promise<void> {
+  const list = await getIncomeCategoryEntries();
+  await saveIncomeCategories(list.map((c) => (c.name === name ? { ...c, color } : c)));
+}
+
+export async function setExpenseCategoryColor(name: string, color: string): Promise<void> {
+  const list = await getExpenseCategories();
+  await saveExpenseCategories(list.map((c) => (c.name === name ? { ...c, color } : c)));
 }
 
 /** Whether any saved transaction still uses this category — used to warn
