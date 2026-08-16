@@ -7,8 +7,8 @@ const QUICK_LABEL: Record<QuickPeriod, string> = { week: "이번 주", month: "�
 /**
  * Period selector shared by the category-breakdown, weekly, and monthly
  * dashboard sections. With `quickOptions` it renders 이번주/이번달/전체 plus
- * "세부 기간 설정"; without it (weekly/monthly), it renders a single
- * `defaultLabel` button plus "세부 기간 설정" — `selection: null` means "use
+ * "기간 설정"; without it (weekly/monthly), it renders a single
+ * `defaultLabel` button plus "기간 설정" — `selection: null` means "use
  * the section's own default window" (e.g. recent 8 weeks).
  */
 export default function PeriodFilter({
@@ -75,7 +75,7 @@ export default function PeriodFilter({
             isCustomActive ? "bg-black text-white dark:bg-white dark:text-black" : "text-zinc-600 dark:text-zinc-400"
           }`}
         >
-          세부 기간 설정
+          기간 설정
         </button>
       </div>
 

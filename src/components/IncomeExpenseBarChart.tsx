@@ -40,9 +40,14 @@ export default function IncomeExpenseBarChart({ data }: { data: BarPoint[] }) {
   // left YAxis eats into that box — so the plot (bars/XAxis) sits visibly
   // right of the Legend's center by half the YAxis width. Margins can't fix
   // this (both the Legend and the plot read off the same margin box), so a
-  // second, invisible YAxis mirrors the real one's width on the right,
-  // making the plot itself symmetric within the margin box.
+  // second, invisible YAxis on the right nudges the plot back toward that
+  // center. Mirroring the real axis's full width overcorrects — most of
+  // that width is the tick-label text ("100만" etc.), which the right side
+  // doesn't need — so it only mirrors the small breathing-room gap next to
+  // the plot, trading exact centering for keeping the plot wide enough that
+  // the x-axis doesn't start skipping tick labels.
   const Y_AXIS_WIDTH = 44;
+  const MIRROR_AXIS_WIDTH = 8;
   const marginLeft = 8;
 
   const chart = (
@@ -52,7 +57,13 @@ export default function IncomeExpenseBarChart({ data }: { data: BarPoint[] }) {
       {...(chartWidth ? { width: chartWidth, height: 260 } : {})}
     >
       <CartesianGrid stroke={GRID_COLOR} vertical={false} />
-      <XAxis dataKey="label" stroke={AXIS_COLOR} tick={{ fill: MUTED_TEXT_COLOR, fontSize: 12 }} tickLine={false} />
+      <XAxis
+        dataKey="label"
+        stroke={AXIS_COLOR}
+        tick={{ fill: MUTED_TEXT_COLOR, fontSize: 12 }}
+        tickLine={false}
+        interval={0}
+      />
       <YAxis
         stroke={AXIS_COLOR}
         tick={{ fill: MUTED_TEXT_COLOR, fontSize: 12 }}
@@ -60,7 +71,14 @@ export default function IncomeExpenseBarChart({ data }: { data: BarPoint[] }) {
         width={Y_AXIS_WIDTH}
         tickLine={false}
       />
-      <YAxis yAxisId="mirror" orientation="right" width={Y_AXIS_WIDTH} tick={false} axisLine={false} tickLine={false} />
+      <YAxis
+        yAxisId="mirror"
+        orientation="right"
+        width={MIRROR_AXIS_WIDTH}
+        tick={false}
+        axisLine={false}
+        tickLine={false}
+      />
       <Legend />
       <Bar dataKey="income" name="수입" fill={INCOME_COLOR} radius={[3, 3, 0, 0]}>
         <LabelList dataKey="income" position="top" formatter={(v) => formatBarLabel(Number(v))} fontSize={10} fill={MUTED_TEXT_COLOR} />
