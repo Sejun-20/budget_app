@@ -1,13 +1,18 @@
 import { PieChart, Pie, Cell, Legend, ResponsiveContainer, type PieLabelRenderProps } from "recharts";
-import { CATEGORY_COLORS, formatWon } from "@/lib/chartColors";
-import type { ExpenseCategory } from "@/lib/categories";
+import { formatWon } from "@/lib/chartColors";
 
 interface CategoryAmount {
   category: string;
   amount: number;
 }
 
-export default function CategoryPieChart({ data }: { data: CategoryAmount[] }) {
+export default function CategoryPieChart({
+  data,
+  colorMap,
+}: {
+  data: CategoryAmount[];
+  colorMap: Record<string, string>;
+}) {
   const total = data.reduce((sum, d) => sum + d.amount, 0);
 
   if (data.length === 0 || total === 0) {
@@ -18,8 +23,7 @@ export default function CategoryPieChart({ data }: { data: CategoryAmount[] }) {
     );
   }
 
-  const colorFor = (category: string) =>
-    CATEGORY_COLORS[category as ExpenseCategory] ?? "var(--chart-text-muted)";
+  const colorFor = (category: string) => colorMap[category] ?? "var(--chart-text-muted)";
 
   // recharts already computes the label anchor point (x/y/textAnchor) to
   // match where the leader line ends — reuse it as-is so the two never

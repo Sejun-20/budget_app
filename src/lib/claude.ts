@@ -1,5 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { EXPENSE_CATEGORIES, type ExpenseCategory } from "./categories";
+import { getExpenseCategoryNames } from "./categories";
 import { getApiKey } from "./apiKey";
 import type { SupportedImageMediaType } from "./image";
 
@@ -19,43 +19,45 @@ export interface ReceiptDraft {
   merchant: string;
   date: string;
   amount: number;
-  category: ExpenseCategory;
+  category: string;
   memo: string;
 }
 
-const EXTRACT_TOOL: Anthropic.Tool = {
-  name: "extract_receipt",
-  description: "영수증 사진에서 상호명, 날짜, 총액, 카테고리, 메모를 추출합니다.",
-  input_schema: {
-    type: "object",
-    properties: {
-      merchant: {
-        type: "string",
-        description: "상호명. 알아볼 수 없으면 빈 문자열.",
+function buildExtractTool(categoryNames: string[]): Anthropic.Tool {
+  return {
+    name: "extract_receipt",
+    description: "영수증 사진에서 상호명, 날짜, 총액, 카테고리, 메모를 추출합니다.",
+    input_schema: {
+      type: "object",
+      properties: {
+        merchant: {
+          type: "string",
+          description: "상호명. 알아볼 수 없으면 빈 문자열.",
+        },
+        date: {
+          type: "string",
+          description: "거래 날짜, YYYY-MM-DD 형식. 연도가 영수증에 없으면 오늘 날짜의 연도로 추정.",
+        },
+        amount: {
+          type: "integer",
+          description: "총 결제 금액 (원화 기준 정수, 콤마/원 기호 제외).",
+        },
+        category: {
+          type: "string",
+          enum: categoryNames,
+          description: "다음 중 가장 적절한 지출 카테고리 하나: " + categoryNames.join(", "),
+        },
+        memo: {
+          type: "string",
+          description: "구매 품목 등 참고할 메모. 없으면 빈 문자열.",
+        },
       },
-      date: {
-        type: "string",
-        description: "거래 날짜, YYYY-MM-DD 형식. 연도가 영수증에 없으면 오늘 날짜의 연도로 추정.",
-      },
-      amount: {
-        type: "integer",
-        description: "총 결제 금액 (원화 기준 정수, 콤마/원 기호 제외).",
-      },
-      category: {
-        type: "string",
-        enum: [...EXPENSE_CATEGORIES],
-        description: "다음 중 가장 적절한 지출 카테고리 하나: " + EXPENSE_CATEGORIES.join(", "),
-      },
-      memo: {
-        type: "string",
-        description: "구매 품목 등 참고할 메모. 없으면 빈 문자열.",
-      },
+      required: ["merchant", "date", "amount", "category", "memo"],
     },
-    required: ["merchant", "date", "amount", "category", "memo"],
-  },
-};
+  };
+}
 
-function isValidDraft(input: unknown): input is ReceiptDraft {
+function isValidDraft(input: unknown, categoryNames: string[]): input is ReceiptDraft {
   if (!input || typeof input !== "object") return false;
   const d = input as Record<string, unknown>;
   return (
@@ -66,7 +68,7 @@ function isValidDraft(input: unknown): input is ReceiptDraft {
     Number.isFinite(d.amount) &&
     d.amount > 0 &&
     typeof d.category === "string" &&
-    (EXPENSE_CATEGORIES as readonly string[]).includes(d.category) &&
+    categoryNames.includes(d.category) &&
     typeof d.memo === "string"
   );
 }
@@ -74,12 +76,13 @@ function isValidDraft(input: unknown): input is ReceiptDraft {
 async function callExtract(
   model: string,
   base64: string,
-  mediaType: SupportedImageMediaType
+  mediaType: SupportedImageMediaType,
+  categoryNames: string[]
 ): Promise<ReceiptDraft | null> {
   const response = await getClient().messages.create({
     model,
     max_tokens: 1024,
-    tools: [EXTRACT_TOOL],
+    tools: [buildExtractTool(categoryNames)],
     tool_choice: { type: "tool", name: "extract_receipt" },
     messages: [
       {
@@ -101,7 +104,7 @@ async function callExtract(
   const toolUse = response.content.find(
     (block): block is Anthropic.ToolUseBlock => block.type === "tool_use"
   );
-  if (!toolUse || !isValidDraft(toolUse.input)) return null;
+  if (!toolUse || !isValidDraft(toolUse.input, categoryNames)) return null;
   return toolUse.input;
 }
 
@@ -114,14 +117,16 @@ export async function extractReceipt(
   base64: string,
   mediaType: SupportedImageMediaType
 ): Promise<ReceiptDraft> {
+  const categoryNames = await getExpenseCategoryNames();
+
   try {
-    const draft = await callExtract(HAIKU_MODEL, base64, mediaType);
+    const draft = await callExtract(HAIKU_MODEL, base64, mediaType, categoryNames);
     if (draft) return draft;
   } catch {
     // fall through to the fallback model
   }
 
-  const fallbackDraft = await callExtract(FALLBACK_MODEL, base64, mediaType);
+  const fallbackDraft = await callExtract(FALLBACK_MODEL, base64, mediaType, categoryNames);
   if (fallbackDraft) return fallbackDraft;
 
   throw new Error("영수증 정보를 추출하지 못했습니다.");

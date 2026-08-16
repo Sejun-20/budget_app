@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { EXPENSE_CATEGORIES, type ExpenseCategory } from "@/lib/categories";
+import { getExpenseCategoryNames } from "@/lib/categories";
 import { formatAmountInput, parseAmountInput } from "@/lib/money";
 import { prepareImageForClaude } from "@/lib/image";
 import { extractReceipt } from "@/lib/claude";
@@ -13,7 +13,7 @@ interface Draft {
   merchant: string;
   date: string;
   amount: number;
-  category: ExpenseCategory;
+  category: string;
   memo: string;
 }
 
@@ -35,8 +35,10 @@ export default function ReceiptUpload() {
   const [progress, setProgress] = useState({ done: 0, total: 0 });
   const [saving, setSaving] = useState(false);
   const [fullscreenUrl, setFullscreenUrl] = useState<string | null>(null);
+  const [expenseCategories, setExpenseCategories] = useState<string[]>([]);
 
   useEffect(() => {
+    getExpenseCategoryNames().then(setExpenseCategories);
     return () => {
       for (const d of queue) URL.revokeObjectURL(d.previewUrl);
     };
@@ -219,10 +221,10 @@ export default function ReceiptUpload() {
             카테고리
             <select
               value={queue[0].category}
-              onChange={(e) => updateCurrentDraft({ category: e.target.value as ExpenseCategory })}
+              onChange={(e) => updateCurrentDraft({ category: e.target.value })}
               className="rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
             >
-              {EXPENSE_CATEGORIES.map((c) => (
+              {expenseCategories.map((c) => (
                 <option key={c} value={c}>
                   {c}
                 </option>

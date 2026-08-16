@@ -1,5 +1,4 @@
 import { getDb, type TransactionRecord } from "./db";
-import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from "./categories";
 
 export interface NewTransaction {
   type: "income" | "expense";
@@ -20,11 +19,7 @@ export function validateTransaction(input: Partial<NewTransaction>): string | nu
   if (input.source !== "receipt" && input.source !== "manual") {
     return "source가 올바르지 않습니다.";
   }
-  const validCategories = input.type === "income" ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
-  if (
-    typeof input.category !== "string" ||
-    !(validCategories as readonly string[]).includes(input.category)
-  ) {
+  if (typeof input.category !== "string" || input.category.trim() === "") {
     return "category가 올바르지 않습니다.";
   }
   if (typeof input.amount !== "number" || !Number.isFinite(input.amount) || input.amount <= 0) {

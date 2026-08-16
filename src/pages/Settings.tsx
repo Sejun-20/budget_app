@@ -3,6 +3,18 @@ import { Link } from "react-router-dom";
 import { getApiKey, setApiKey, clearApiKey } from "@/lib/apiKey";
 import { formatAmountInput, parseAmountInput } from "@/lib/money";
 import { getInitialBalance, hasInitialBalance, setInitialBalance } from "@/lib/settings";
+import {
+  getIncomeCategories,
+  getExpenseCategories,
+  addIncomeCategory,
+  renameIncomeCategory,
+  deleteIncomeCategory,
+  addExpenseCategory,
+  renameExpenseCategory,
+  deleteExpenseCategory,
+} from "@/lib/categories";
+import { getCategoryColorMap } from "@/lib/chartColors";
+import CategoryManager from "@/components/CategoryManager";
 
 export default function Settings() {
   const [keyInput, setKeyInput] = useState("");
@@ -13,8 +25,24 @@ export default function Settings() {
   const [balanceSaved, setBalanceSaved] = useState(false);
   const [balanceHasValue, setBalanceHasValue] = useState(false);
 
+  const [incomeCategories, setIncomeCategories] = useState<string[]>([]);
+  const [expenseCategories, setExpenseCategories] = useState<string[]>([]);
+  const [expenseColorMap, setExpenseColorMap] = useState<Record<string, string>>({});
+
+  async function reloadCategories() {
+    const [income, expense, colorMap] = await Promise.all([
+      getIncomeCategories(),
+      getExpenseCategories(),
+      getCategoryColorMap(),
+    ]);
+    setIncomeCategories(income);
+    setExpenseCategories(expense.map((c) => c.name));
+    setExpenseColorMap(colorMap);
+  }
+
   useEffect(() => {
     setHasKey(!!getApiKey());
+    reloadCategories();
     (async () => {
       if (await hasInitialBalance()) {
         setBalanceHasValue(true);
@@ -124,6 +152,43 @@ export default function Settings() {
           {balanceSaved && <p className="text-sm text-green-600">저장되었습니다.</p>}
         </form>
       </section>
+
+      <CategoryManager
+        title="지출 카테고리"
+        description="영수증 인식과 지출 입력에 사용되는 카테고리입니다. 이름을 바꾸면 기존 내역에도 함께 반영됩니다."
+        categories={expenseCategories}
+        colorFor={(name) => expenseColorMap[name] ?? "var(--chart-text-muted)"}
+        onAdd={async (name) => {
+          await addExpenseCategory(name);
+          await reloadCategories();
+        }}
+        onRename={async (oldName, newName) => {
+          await renameExpenseCategory(oldName, newName);
+          await reloadCategories();
+        }}
+        onDelete={async (name) => {
+          await deleteExpenseCategory(name);
+          await reloadCategories();
+        }}
+      />
+
+      <CategoryManager
+        title="수입 카테고리"
+        description="수입 입력에 사용되는 카테고리입니다. 이름을 바꾸면 기존 내역에도 함께 반영됩니다."
+        categories={incomeCategories}
+        onAdd={async (name) => {
+          await addIncomeCategory(name);
+          await reloadCategories();
+        }}
+        onRename={async (oldName, newName) => {
+          await renameIncomeCategory(oldName, newName);
+          await reloadCategories();
+        }}
+        onDelete={async (name) => {
+          await deleteIncomeCategory(name);
+          await reloadCategories();
+        }}
+      />
     </div>
   );
 }

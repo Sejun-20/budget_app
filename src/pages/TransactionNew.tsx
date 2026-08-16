@@ -1,6 +1,6 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { INCOME_CATEGORIES, EXPENSE_CATEGORIES } from "@/lib/categories";
+import { getIncomeCategories, getExpenseCategoryNames } from "@/lib/categories";
 import { formatAmountInput, formatWon, parseAmountInput } from "@/lib/money";
 import { insertTransaction } from "@/lib/transactions";
 
@@ -17,8 +17,10 @@ export default function TransactionNew() {
   const initialType: TxType = searchParams.get("type") === "income" ? "income" : "expense";
 
   const [type, setType] = useState<TxType>(initialType);
-  const categories = type === "income" ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
-  const [category, setCategory] = useState<string>(categories[0]);
+  const [incomeCategories, setIncomeCategories] = useState<string[]>([]);
+  const [expenseCategories, setExpenseCategories] = useState<string[]>([]);
+  const categories = type === "income" ? incomeCategories : expenseCategories;
+  const [category, setCategory] = useState<string>("");
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState(todayString());
   const [memo, setMemo] = useState("");
@@ -26,10 +28,19 @@ export default function TransactionNew() {
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
+  useEffect(() => {
+    Promise.all([getIncomeCategories(), getExpenseCategoryNames()]).then(([income, expense]) => {
+      setIncomeCategories(income);
+      setExpenseCategories(expense);
+      setCategory((type === "income" ? income : expense)[0] ?? "");
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   function handleTypeChange(next: TxType) {
     setType(next);
-    const nextCategories = next === "income" ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
-    setCategory(nextCategories[0]);
+    const nextCategories = next === "income" ? incomeCategories : expenseCategories;
+    setCategory(nextCategories[0] ?? "");
     setError(null);
     setSuccessMsg(null);
   }

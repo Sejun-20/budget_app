@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
-import { formatWon } from "@/lib/chartColors";
+import { formatWon, getCategoryColorMap } from "@/lib/chartColors";
 import { formatAmountInput, parseAmountInput } from "@/lib/money";
 import type { PeriodSelection } from "@/lib/period";
 import {
@@ -33,6 +33,7 @@ export default function Dashboard() {
   const [breakdown, setBreakdown] = useState<CategoryAmount[] | null>(null);
   const [weekly, setWeekly] = useState<WeeklyPoint[] | null>(null);
   const [monthly, setMonthly] = useState<MonthlyPoint[] | null>(null);
+  const [colorMap, setColorMap] = useState<Record<string, string>>({});
 
   const [breakdownSelection, setBreakdownSelection] = useState<PeriodSelection | null>({
     kind: "quick",
@@ -54,6 +55,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     loadSummary();
+    getCategoryColorMap().then(setColorMap);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -175,7 +177,7 @@ export default function Dashboard() {
         {breakdown === null ? (
           <p className="py-8 text-center text-sm text-zinc-500">불러오는 중...</p>
         ) : (
-          <CategoryPieChart data={breakdown} />
+          <CategoryPieChart data={breakdown} colorMap={colorMap} />
         )}
       </section>
 

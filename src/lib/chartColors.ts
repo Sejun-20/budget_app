@@ -1,10 +1,11 @@
-import { EXPENSE_CATEGORIES, type ExpenseCategory } from "./categories";
+import { getExpenseCategories } from "./categories";
 
 export { formatWon } from "./money";
 
-// Fixed categorical slots from the validated palette. Assigned by category
-// identity (declaration order), never by rank/value, so a category always
-// keeps the same color regardless of which period/filter is active.
+// Fixed categorical slots from the validated palette. Each category is
+// assigned a stable slot (see categories.ts) at creation time, never by
+// array position, so a category keeps its color regardless of which other
+// categories currently exist or which period/filter is active.
 const CATEGORY_COLOR_VARS = [
   "--chart-cat-1",
   "--chart-cat-2",
@@ -14,9 +15,14 @@ const CATEGORY_COLOR_VARS = [
   "--chart-cat-6",
 ] as const;
 
-export const CATEGORY_COLORS: Record<ExpenseCategory, string> = Object.fromEntries(
-  EXPENSE_CATEGORIES.map((cat, i) => [cat, `var(${CATEGORY_COLOR_VARS[i]})`])
-) as Record<ExpenseCategory, string>;
+export async function getCategoryColorMap(): Promise<Record<string, string>> {
+  const categories = await getExpenseCategories();
+  const map: Record<string, string> = {};
+  for (const c of categories) {
+    map[c.name] = `var(${CATEGORY_COLOR_VARS[c.colorIndex % CATEGORY_COLOR_VARS.length]})`;
+  }
+  return map;
+}
 
 export const INCOME_COLOR = "var(--chart-income)";
 export const EXPENSE_COLOR = "var(--chart-expense)";

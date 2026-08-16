@@ -1,5 +1,5 @@
-import { useState, type FormEvent } from "react";
-import { INCOME_CATEGORIES, EXPENSE_CATEGORIES } from "@/lib/categories";
+import { useEffect, useState, type FormEvent } from "react";
+import { getIncomeCategories, getExpenseCategoryNames } from "@/lib/categories";
 import { formatAmountInput, parseAmountInput } from "@/lib/money";
 import { updateTransaction, type Transaction } from "@/lib/transactions";
 
@@ -15,10 +15,9 @@ export default function TransactionEditForm({
   onSaved: (updated: Transaction) => void;
 }) {
   const [type, setType] = useState<TxType>(transaction.type);
-  const categories = type === "income" ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
-  const [category, setCategory] = useState<string>(
-    (categories as readonly string[]).includes(transaction.category) ? transaction.category : categories[0]
-  );
+  const [incomeCategories, setIncomeCategories] = useState<string[]>([]);
+  const [expenseCategories, setExpenseCategories] = useState<string[]>([]);
+  const [category, setCategory] = useState<string>(transaction.category);
   const [amount, setAmount] = useState(String(transaction.amount));
   const [date, setDate] = useState(transaction.date);
   const [merchant, setMerchant] = useState(transaction.merchant ?? "");
@@ -26,10 +25,22 @@ export default function TransactionEditForm({
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
+  useEffect(() => {
+    Promise.all([getIncomeCategories(), getExpenseCategoryNames()]).then(([income, expense]) => {
+      setIncomeCategories(income);
+      setExpenseCategories(expense);
+    });
+  }, []);
+
+  const categories = type === "income" ? incomeCategories : expenseCategories;
+  // If the transaction's saved category was since renamed/deleted from the
+  // live list, keep showing it as an option instead of silently swapping it.
+  const selectableCategories = categories.includes(category) ? categories : [category, ...categories];
+
   function handleTypeChange(next: TxType) {
     setType(next);
-    const nextCategories = next === "income" ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
-    setCategory(nextCategories[0]);
+    const nextCategories = next === "income" ? incomeCategories : expenseCategories;
+    setCategory(nextCategories[0] ?? "");
   }
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
@@ -103,7 +114,7 @@ export default function TransactionEditForm({
         onChange={(e) => setCategory(e.target.value)}
         className="rounded border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
       >
-        {categories.map((c) => (
+        {selectableCategories.map((c) => (
           <option key={c} value={c}>
             {c}
           </option>
