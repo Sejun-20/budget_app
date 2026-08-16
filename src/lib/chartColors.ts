@@ -1,4 +1,4 @@
-import { getExpenseCategories } from "./categories";
+import { getExpenseCategories, getIncomeCategoryEntries } from "./categories";
 
 export { formatWon } from "./money";
 
@@ -15,8 +15,17 @@ const CATEGORY_COLOR_VARS = [
   "--chart-cat-6",
 ] as const;
 
-export async function getCategoryColorMap(): Promise<Record<string, string>> {
+export async function getExpenseCategoryColorMap(): Promise<Record<string, string>> {
   const categories = await getExpenseCategories();
+  const map: Record<string, string> = {};
+  for (const c of categories) {
+    map[c.name] = `var(${CATEGORY_COLOR_VARS[c.colorIndex % CATEGORY_COLOR_VARS.length]})`;
+  }
+  return map;
+}
+
+export async function getIncomeCategoryColorMap(): Promise<Record<string, string>> {
+  const categories = await getIncomeCategoryEntries();
   const map: Record<string, string> = {};
   for (const c of categories) {
     map[c.name] = `var(${CATEGORY_COLOR_VARS[c.colorIndex % CATEGORY_COLOR_VARS.length]})`;

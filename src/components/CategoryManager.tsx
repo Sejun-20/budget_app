@@ -5,6 +5,7 @@ export default function CategoryManager({
   description,
   categories,
   colorFor,
+  checkHistory,
   onAdd,
   onRename,
   onDelete,
@@ -14,6 +15,8 @@ export default function CategoryManager({
   categories: string[];
   /** Optional per-category color dot (expense categories only). */
   colorFor?: (name: string) => string;
+  /** Whether the category still has saved transactions — gates the extra rename/delete choice. */
+  checkHistory: (name: string) => Promise<boolean>;
   onAdd: (name: string) => Promise<void>;
   onRename: (oldName: string, newName: string) => Promise<void>;
   onDelete: (name: string) => Promise<void>;
@@ -22,6 +25,8 @@ export default function CategoryManager({
   const [editing, setEditing] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
   const [busy, setBusy] = useState(false);
+  const [historyPrompt, setHistoryPrompt] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
   async function handleAdd() {
     const trimmed = newName.trim();
@@ -57,7 +62,24 @@ export default function CategoryManager({
       window.alert("카테고리는 최소 1개 이상 있어야 합니다.");
       return;
     }
-    if (!window.confirm(`"${name}" 카테고리를 삭제할까요? 기존 내역의 카테고리 표시는 그대로 유지됩니다.`)) return;
+    setBusy(true);
+    const hasHistory = await checkHistory(name);
+    setBusy(false);
+    if (hasHistory) {
+      setHistoryPrompt(name);
+      return;
+    }
+    if (!window.confirm(`"${name}" 카테고리를 삭제할까요?`)) return;
+    setBusy(true);
+    try {
+      await onDelete(name);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function confirmFinalDelete(name: string) {
+    setConfirmDelete(null);
     setBusy(true);
     try {
       await onDelete(name);
@@ -156,6 +178,83 @@ export default function CategoryManager({
           추가
         </button>
       </div>
+
+      {historyPrompt && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-6"
+          onClick={() => setHistoryPrompt(null)}
+        >
+          <div
+            className="w-full max-w-xs rounded-lg bg-white p-5 dark:bg-zinc-900"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="text-sm text-zinc-700 dark:text-zinc-300">
+              &quot;{historyPrompt}&quot; 과거 내역이 있는 카테고리입니다. 다른 카테고리로 변경하시겠습니까?
+            </p>
+            <div className="mt-4 flex gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  startEdit(historyPrompt);
+                  setHistoryPrompt(null);
+                }}
+                className="flex-1 rounded bg-black px-4 py-2 text-sm font-medium text-white dark:bg-white dark:text-black"
+              >
+                변경
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setConfirmDelete(historyPrompt);
+                  setHistoryPrompt(null);
+                }}
+                className="flex-1 rounded border border-zinc-300 px-4 py-2 text-sm text-red-600 dark:border-zinc-700"
+              >
+                삭제
+              </button>
+            </div>
+            <button
+              type="button"
+              onClick={() => setHistoryPrompt(null)}
+              className="mt-3 w-full text-center text-xs text-zinc-500 underline dark:text-zinc-400"
+            >
+              취소
+            </button>
+          </div>
+        </div>
+      )}
+
+      {confirmDelete && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-6"
+          onClick={() => setConfirmDelete(null)}
+        >
+          <div
+            className="w-full max-w-xs rounded-lg bg-white p-5 dark:bg-zinc-900"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="text-sm text-zinc-700 dark:text-zinc-300">
+              카테고리가 삭제됩니다. 과거 내역은 그대로 유지됩니다.
+            </p>
+            <div className="mt-4 flex gap-2">
+              <button
+                type="button"
+                onClick={() => confirmFinalDelete(confirmDelete)}
+                className="flex-1 rounded bg-black px-4 py-2 text-sm font-medium text-white dark:bg-white dark:text-black"
+              >
+                확인
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirmDelete(null)}
+                className="flex-1 rounded border border-zinc-300 px-4 py-2 text-sm dark:border-zinc-700"
+              >
+                취소
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

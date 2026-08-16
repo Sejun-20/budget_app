@@ -1,5 +1,4 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { Link } from "react-router-dom";
 import { getApiKey, setApiKey, clearApiKey } from "@/lib/apiKey";
 import { formatAmountInput, parseAmountInput } from "@/lib/money";
 import { getInitialBalance, hasInitialBalance, setInitialBalance } from "@/lib/settings";
@@ -12,9 +11,11 @@ import {
   addExpenseCategory,
   renameExpenseCategory,
   deleteExpenseCategory,
+  categoryHasTransactions,
 } from "@/lib/categories";
-import { getCategoryColorMap } from "@/lib/chartColors";
+import { getExpenseCategoryColorMap } from "@/lib/chartColors";
 import CategoryManager from "@/components/CategoryManager";
+import HomeLink from "@/components/HomeLink";
 
 export default function Settings() {
   const [keyInput, setKeyInput] = useState("");
@@ -33,7 +34,7 @@ export default function Settings() {
     const [income, expense, colorMap] = await Promise.all([
       getIncomeCategories(),
       getExpenseCategories(),
-      getCategoryColorMap(),
+      getExpenseCategoryColorMap(),
     ]);
     setIncomeCategories(income);
     setExpenseCategories(expense.map((c) => c.name));
@@ -80,9 +81,7 @@ export default function Settings() {
     <div className="mx-auto flex min-h-screen w-full max-w-lg flex-col gap-8 p-6">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold">설정</h1>
-        <Link to="/" className="text-sm text-zinc-500 underline">
-          홈으로
-        </Link>
+        <HomeLink />
       </div>
 
       <section className="flex flex-col gap-3">
@@ -155,9 +154,10 @@ export default function Settings() {
 
       <CategoryManager
         title="지출 카테고리"
-        description="영수증 인식과 지출 입력에 사용되는 카테고리입니다. 이름을 바꾸면 기존 내역에도 함께 반영됩니다."
+        description="영수증 인식과 지출 입력에 사용되는 카테고리입니다. 이름을 바꾸면 기존 내역에도 함께 반영되고, 삭제해도 기존 내역의 카테고리 표시는 그대로 유지됩니다."
         categories={expenseCategories}
         colorFor={(name) => expenseColorMap[name] ?? "var(--chart-text-muted)"}
+        checkHistory={(name) => categoryHasTransactions("expense", name)}
         onAdd={async (name) => {
           await addExpenseCategory(name);
           await reloadCategories();
@@ -174,8 +174,9 @@ export default function Settings() {
 
       <CategoryManager
         title="수입 카테고리"
-        description="수입 입력에 사용되는 카테고리입니다. 이름을 바꾸면 기존 내역에도 함께 반영됩니다."
+        description="수입 입력에 사용되는 카테고리입니다. 이름을 바꾸면 기존 내역에도 함께 반영되고, 삭제해도 기존 내역의 카테고리 표시는 그대로 유지됩니다."
         categories={incomeCategories}
+        checkHistory={(name) => categoryHasTransactions("income", name)}
         onAdd={async (name) => {
           await addIncomeCategory(name);
           await reloadCategories();

@@ -1,6 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { Link } from "react-router-dom";
-import { formatWon, getCategoryColorMap } from "@/lib/chartColors";
+import { formatWon, getExpenseCategoryColorMap, getIncomeCategoryColorMap } from "@/lib/chartColors";
 import { formatAmountInput, parseAmountInput } from "@/lib/money";
 import type { PeriodSelection } from "@/lib/period";
 import {
@@ -17,6 +16,7 @@ import { setInitialBalance } from "@/lib/settings";
 import CategoryPieChart from "@/components/CategoryPieChart";
 import IncomeExpenseBarChart, { type BarPoint } from "@/components/IncomeExpenseBarChart";
 import PeriodFilter from "@/components/PeriodFilter";
+import HomeLink from "@/components/HomeLink";
 
 function formatWeekLabel(weekStart: string): string {
   const [, m, d] = weekStart.split("-");
@@ -30,12 +30,18 @@ function formatMonthLabel(month: string): string {
 
 export default function Dashboard() {
   const [summary, setSummary] = useState<BalanceSummary | null>(null);
-  const [breakdown, setBreakdown] = useState<CategoryAmount[] | null>(null);
+  const [expenseBreakdown, setExpenseBreakdown] = useState<CategoryAmount[] | null>(null);
+  const [incomeBreakdown, setIncomeBreakdown] = useState<CategoryAmount[] | null>(null);
   const [weekly, setWeekly] = useState<WeeklyPoint[] | null>(null);
   const [monthly, setMonthly] = useState<MonthlyPoint[] | null>(null);
-  const [colorMap, setColorMap] = useState<Record<string, string>>({});
+  const [expenseColorMap, setExpenseColorMap] = useState<Record<string, string>>({});
+  const [incomeColorMap, setIncomeColorMap] = useState<Record<string, string>>({});
 
-  const [breakdownSelection, setBreakdownSelection] = useState<PeriodSelection | null>({
+  const [expenseBreakdownSelection, setExpenseBreakdownSelection] = useState<PeriodSelection | null>({
+    kind: "quick",
+    value: "month",
+  });
+  const [incomeBreakdownSelection, setIncomeBreakdownSelection] = useState<PeriodSelection | null>({
     kind: "quick",
     value: "month",
   });
@@ -55,13 +61,22 @@ export default function Dashboard() {
 
   useEffect(() => {
     loadSummary();
-    getCategoryColorMap().then(setColorMap);
+    getExpenseCategoryColorMap().then(setExpenseColorMap);
+    getIncomeCategoryColorMap().then(setIncomeColorMap);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    getCategoryBreakdown(breakdownSelection ?? { kind: "quick", value: "month" }).then(setBreakdown);
-  }, [breakdownSelection]);
+    getCategoryBreakdown(expenseBreakdownSelection ?? { kind: "quick", value: "month" }, "expense").then(
+      setExpenseBreakdown
+    );
+  }, [expenseBreakdownSelection]);
+
+  useEffect(() => {
+    getCategoryBreakdown(incomeBreakdownSelection ?? { kind: "quick", value: "month" }, "income").then(
+      setIncomeBreakdown
+    );
+  }, [incomeBreakdownSelection]);
 
   useEffect(() => {
     const custom = weeklySelection?.kind === "custom" ? weeklySelection.value : undefined;
@@ -101,9 +116,7 @@ export default function Dashboard() {
     <div className="mx-auto flex min-h-screen max-w-2xl flex-col gap-8 p-6">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold">대시보드</h1>
-        <Link to="/" className="text-sm text-zinc-500 underline">
-          홈으로
-        </Link>
+        <HomeLink />
       </div>
 
       {/* 현재 자산 */}
@@ -111,7 +124,7 @@ export default function Dashboard() {
         {editingBalance ? (
           <form onSubmit={saveInitialBalance} className="flex flex-col gap-3">
             <label className="flex flex-col gap-1 text-sm">
-              {summary?.hasInitialBalance ? "초기 자산 수정 (원)" : "앱을 처음 사용하는 시점의 잔액을 입력하세요 (원)"}
+              앱을 처음 사용하는 시점의 잔액을 입력하세요 (원)
               <input
                 type="text"
                 inputMode="numeric"
@@ -124,60 +137,63 @@ export default function Dashboard() {
               />
             </label>
             {balanceError && <p className="text-sm text-red-600">{balanceError}</p>}
-            <div className="flex gap-2">
-              <button
-                type="submit"
-                disabled={savingBalance}
-                className="rounded bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-50 dark:bg-white dark:text-black"
-              >
-                저장
-              </button>
-              {summary?.hasInitialBalance && (
-                <button
-                  type="button"
-                  onClick={() => setEditingBalance(false)}
-                  className="rounded border border-zinc-300 px-4 py-2 text-sm dark:border-zinc-700"
-                >
-                  취소
-                </button>
-              )}
-            </div>
+            <button
+              type="submit"
+              disabled={savingBalance}
+              className="rounded bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-50 dark:bg-white dark:text-black"
+            >
+              저장
+            </button>
           </form>
         ) : (
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400">현재 자산</p>
-              <p className="text-3xl font-semibold tabular-nums">{summary ? formatWon(summary.balance) : "..."}</p>
-              {summary && (
-                <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-                  초기 {formatWon(summary.initialBalance)} + 수입 {formatWon(summary.totalIncome)} − 지출{" "}
-                  {formatWon(summary.totalExpense)}
-                </p>
-              )}
-            </div>
-            <button
-              onClick={() => {
-                setBalanceInput(String(summary?.initialBalance ?? ""));
-                setEditingBalance(true);
-              }}
-              className="text-xs text-zinc-500 underline"
-            >
-              초기 자산 수정
-            </button>
+          <div>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">현재 자산</p>
+            <p className="text-3xl font-semibold tabular-nums">{summary ? formatWon(summary.balance) : "..."}</p>
+            {summary && (
+              <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+                초기 {formatWon(summary.initialBalance)} + 수입 {formatWon(summary.totalIncome)} − 지출{" "}
+                {formatWon(summary.totalExpense)}
+              </p>
+            )}
           </div>
         )}
       </section>
 
-      {/* 카테고리별 비율 */}
+      {/* 카테고리별 지출 비율 */}
       <section className="rounded-lg border border-zinc-200 p-5 dark:border-zinc-800">
         <div className="mb-4 flex flex-col gap-3">
           <h2 className="text-sm font-medium text-zinc-700 dark:text-zinc-300">카테고리별 지출 비율</h2>
-          <PeriodFilter quickOptions={["week", "month", "all"]} selection={breakdownSelection} onChange={setBreakdownSelection} />
+          <PeriodFilter
+            quickOptions={["week", "month", "all"]}
+            selection={expenseBreakdownSelection}
+            onChange={setExpenseBreakdownSelection}
+          />
         </div>
-        {breakdown === null ? (
+        {expenseBreakdown === null ? (
           <p className="py-8 text-center text-sm text-zinc-500">불러오는 중...</p>
         ) : (
-          <CategoryPieChart data={breakdown} colorMap={colorMap} />
+          <CategoryPieChart data={expenseBreakdown} colorMap={expenseColorMap} />
+        )}
+      </section>
+
+      {/* 카테고리별 수입 비율 */}
+      <section className="rounded-lg border border-zinc-200 p-5 dark:border-zinc-800">
+        <div className="mb-4 flex flex-col gap-3">
+          <h2 className="text-sm font-medium text-zinc-700 dark:text-zinc-300">카테고리별 수입 비율</h2>
+          <PeriodFilter
+            quickOptions={["week", "month", "all"]}
+            selection={incomeBreakdownSelection}
+            onChange={setIncomeBreakdownSelection}
+          />
+        </div>
+        {incomeBreakdown === null ? (
+          <p className="py-8 text-center text-sm text-zinc-500">불러오는 중...</p>
+        ) : (
+          <CategoryPieChart
+            data={incomeBreakdown}
+            colorMap={incomeColorMap}
+            emptyMessage="해당 기간에 수입 내역이 없습니다."
+          />
         )}
       </section>
 

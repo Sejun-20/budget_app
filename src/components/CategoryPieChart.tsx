@@ -9,18 +9,16 @@ interface CategoryAmount {
 export default function CategoryPieChart({
   data,
   colorMap,
+  emptyMessage = "해당 기간에 지출 내역이 없습니다.",
 }: {
   data: CategoryAmount[];
   colorMap: Record<string, string>;
+  emptyMessage?: string;
 }) {
   const total = data.reduce((sum, d) => sum + d.amount, 0);
 
   if (data.length === 0 || total === 0) {
-    return (
-      <p className="py-8 text-center text-sm text-zinc-500 dark:text-zinc-400">
-        해당 기간에 지출 내역이 없습니다.
-      </p>
-    );
+    return <p className="py-8 text-center text-sm text-zinc-500 dark:text-zinc-400">{emptyMessage}</p>;
   }
 
   const colorFor = (category: string) => colorMap[category] ?? "var(--chart-text-muted)";

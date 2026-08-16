@@ -58,10 +58,13 @@ export interface CategoryAmount {
   amount: number;
 }
 
-export async function getCategoryBreakdown(selection: PeriodSelection): Promise<CategoryAmount[]> {
-  const expenses = (await getAllForAggregation()).filter((t) => t.type === "expense");
+export async function getCategoryBreakdown(
+  selection: PeriodSelection,
+  type: "income" | "expense" = "expense"
+): Promise<CategoryAmount[]> {
+  const matching = (await getAllForAggregation()).filter((t) => t.type === type);
 
-  let filtered = expenses;
+  let filtered = matching;
   if (selection.kind === "quick") {
     if (selection.value !== "all") {
       const today = todayUTC();
@@ -70,11 +73,11 @@ export async function getCategoryBreakdown(selection: PeriodSelection): Promise<
           ? mondayOfWeekUTC(today)
           : new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 1));
       const startStr = formatDateUTC(start);
-      filtered = expenses.filter((t) => t.date >= startStr);
+      filtered = matching.filter((t) => t.date >= startStr);
     }
   } else {
     const { start, end } = resolveCustomRange(selection.value);
-    filtered = expenses.filter((t) => t.date >= start && t.date <= end);
+    filtered = matching.filter((t) => t.date >= start && t.date <= end);
   }
 
   const totals = new Map<string, number>();

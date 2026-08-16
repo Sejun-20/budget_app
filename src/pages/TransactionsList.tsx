@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import HomeLink from "@/components/HomeLink";
 import TransactionEditForm from "@/components/TransactionEditForm";
 import { formatWon } from "@/lib/money";
 import { deleteTransaction, listTransactions, type Transaction } from "@/lib/transactions";
@@ -29,9 +29,7 @@ export default function TransactionsList() {
     <div className="mx-auto flex min-h-screen max-w-2xl flex-col gap-4 p-6">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold">전체 내역</h1>
-        <Link to="/" className="text-sm text-zinc-500 underline">
-          홈으로
-        </Link>
+        <HomeLink />
       </div>
 
       {error && <p className="text-sm text-red-600">{error}</p>}

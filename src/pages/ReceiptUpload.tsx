@@ -156,8 +156,15 @@ export default function ReceiptUpload() {
             accept="image/*"
             multiple
             onChange={(e) => handleFilesSelected(e.target.files)}
-            className="rounded border border-dashed border-zinc-300 p-4 text-sm dark:border-zinc-700"
+            className="hidden"
           />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="rounded border border-dashed border-zinc-300 p-4 text-sm dark:border-zinc-700"
+          >
+            파일 선택
+          </button>
           {uploadError && <p className="text-sm text-red-600">{uploadError}</p>}
           <Link to="/" className="text-center text-sm text-zinc-500 underline">
             홈으로

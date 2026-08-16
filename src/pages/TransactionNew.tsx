@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
+import HomeLink from "@/components/HomeLink";
 import { getIncomeCategories, getExpenseCategoryNames } from "@/lib/categories";
 import { formatAmountInput, formatWon, parseAmountInput } from "@/lib/money";
 import { insertTransaction } from "@/lib/transactions";
@@ -81,9 +82,7 @@ export default function TransactionNew() {
     <div className="mx-auto flex min-h-screen w-full max-w-lg flex-col gap-6 overflow-x-hidden p-6">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold">{type === "income" ? "수입 추가" : "지출 추가"}</h1>
-        <Link to="/" className="text-sm text-zinc-500 underline">
-          홈으로
-        </Link>
+        <HomeLink />
       </div>
 
       <div className="flex w-full rounded border border-zinc-300 p-1 dark:border-zinc-700">
