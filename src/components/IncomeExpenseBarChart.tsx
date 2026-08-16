@@ -38,16 +38,16 @@ export default function IncomeExpenseBarChart({ data }: { data: BarPoint[] }) {
 
   // recharts centers the Legend over the chart's margin box, but only the
   // left YAxis eats into that box — so the plot (bars/XAxis) sits visibly
-  // right of the Legend's center by half the YAxis width. Margins can't fix
-  // this (both the Legend and the plot read off the same margin box), so a
-  // second, invisible YAxis on the right nudges the plot back toward that
-  // center. Mirroring the real axis's full width overcorrects — most of
-  // that width is the tick-label text ("100만" etc.), which the right side
-  // doesn't need — so it only mirrors the small breathing-room gap next to
-  // the plot, trading exact centering for keeping the plot wide enough that
-  // the x-axis doesn't start skipping tick labels.
-  const Y_AXIS_WIDTH = 44;
-  const MIRROR_AXIS_WIDTH = 8;
+  // right of the Legend's center. Margins can't fix this (both the Legend
+  // and the plot read off the same margin box), so a second, invisible
+  // YAxis on the right nudges the plot back toward that center. It only
+  // needs to mirror the left axis's non-text breathing-room gap, not the
+  // tick-label text ("100만" etc.) — the right side has no labels to make
+  // room for.
+  const Y_AXIS_TEXT_WIDTH = 36;
+  const Y_AXIS_GAP = 4;
+  const Y_AXIS_WIDTH = Y_AXIS_TEXT_WIDTH + Y_AXIS_GAP;
+  const MIRROR_AXIS_WIDTH = 12;
   const marginLeft = 8;
 
   const chart = (
