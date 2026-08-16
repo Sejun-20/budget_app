@@ -65,7 +65,10 @@ export default function ReceiptUpload() {
       try {
         const { base64, mediaType } = await prepareImageForClaude(file);
         const draft = await extractReceipt(base64, mediaType);
-        nextQueue.push({ filename: file.name, previewUrl, ...draft });
+        // Claude extracts a memo from the receipt's item list, but that's
+        // often noisy — leave the field empty and let the user type one in
+        // only if they want to.
+        nextQueue.push({ filename: file.name, previewUrl, ...draft, memo: "" });
       } catch (err) {
         nextFailures.push({
           filename: file.name,
@@ -191,13 +194,13 @@ export default function ReceiptUpload() {
             />
           </label>
 
-          <label className="flex flex-col gap-1 text-sm">
+          <label className="flex flex-col gap-1 overflow-x-hidden text-sm">
             날짜
             <input
               type="date"
               value={queue[0].date}
               onChange={(e) => updateCurrentDraft({ date: e.target.value })}
-              className="rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+              className="w-full min-w-0 rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
             />
           </label>
 

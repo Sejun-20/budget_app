@@ -9,8 +9,8 @@ import {
   addDaysUTC,
   mondayOfWeekUTC,
   resolveCustomRange,
-  weeksInMonth,
   weeksInYear,
+  daysInMonth,
 } from "./period";
 
 interface RawTransaction {
@@ -102,10 +102,11 @@ export async function getWeeklySummary(custom?: CustomPeriod): Promise<WeeklyPoi
     weekStarts = Array.from({ length: 8 }, (_, i) =>
       formatDateUTC(addDaysUTC(currentMonday, -7 * (7 - i)))
     );
-  } else if (custom.week) {
-    weekStarts = [custom.week];
   } else if (custom.month) {
-    weekStarts = weeksInMonth(custom.year, custom.month);
+    // 8 weeks ending at the week containing the last day of the selected month.
+    const lastOfMonth = new Date(Date.UTC(custom.year, custom.month - 1, daysInMonth(custom.year, custom.month)));
+    const anchorMonday = mondayOfWeekUTC(lastOfMonth);
+    weekStarts = Array.from({ length: 8 }, (_, i) => formatDateUTC(addDaysUTC(anchorMonday, -7 * (7 - i))));
   } else {
     weekStarts = weeksInYear(custom.year);
   }
@@ -136,12 +137,16 @@ export async function getMonthlySummary(custom?: CustomPeriod): Promise<MonthlyP
   let months: string[];
   if (!custom) {
     const today = todayUTC();
-    months = Array.from({ length: 12 }, (_, i) => {
-      const d = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() - (11 - i), 1));
+    months = Array.from({ length: 6 }, (_, i) => {
+      const d = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() - (5 - i), 1));
       return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
     });
   } else if (custom.month) {
-    months = [`${custom.year}-${String(custom.month).padStart(2, "0")}`];
+    // 6 months ending at the selected year/month.
+    months = Array.from({ length: 6 }, (_, i) => {
+      const d = new Date(Date.UTC(custom.year, custom.month! - 1 - (5 - i), 1));
+      return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
+    });
   } else {
     months = Array.from({ length: 12 }, (_, i) => `${custom.year}-${String(i + 1).padStart(2, "0")}`);
   }

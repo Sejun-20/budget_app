@@ -48,3 +48,23 @@ body {
 #root {
   min-height: 100svh;
 }
+
+/* iOS Safari auto-zooms the page on focus of any form control whose
+   font-size is below 16px. Force 16px on every control so focusing an
+   input never triggers the zoom. */
+input,
+select,
+textarea {
+  font-size: 16px;
+}
+
+/* Charts aren't interactive controls — remove the tap-highlight box and
+   focus outline WebKit/Chrome draw on touch so tapping a slice/bar doesn't
+   show a blue selection rectangle. */
+.recharts-wrapper,
+.recharts-wrapper * {
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+  -webkit-user-select: none;
+  user-select: none;
+}

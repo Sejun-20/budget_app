@@ -128,7 +128,7 @@ export default function TransactionNew() {
           />
         </label>
 
-        <label className="flex w-full min-w-0 flex-col gap-1 text-sm">
+        <label className="flex w-full min-w-0 flex-col gap-1 overflow-x-hidden text-sm">
           날짜
           <input
             type="date"

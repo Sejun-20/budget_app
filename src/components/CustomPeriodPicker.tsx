@@ -16,9 +16,11 @@ function formatWeekLabel(weekStart: string): string {
 export default function CustomPeriodPicker({
   value,
   onChange,
+  showWeek = true,
 }: {
   value: CustomPeriod;
   onChange: (c: CustomPeriod) => void;
+  showWeek?: boolean;
 }) {
   return (
     <div className="flex flex-wrap items-center gap-2 rounded border border-zinc-200 p-3 dark:border-zinc-800">
@@ -47,7 +49,7 @@ export default function CustomPeriodPicker({
         ))}
       </select>
 
-      {value.month && (
+      {showWeek && value.month && (
         <select
           value={value.week ?? ""}
           onChange={(e) => onChange({ year: value.year, month: value.month, week: e.target.value || undefined })}

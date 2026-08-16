@@ -1,4 +1,4 @@
-import { PieChart, Pie, Cell, Legend, ResponsiveContainer } from "recharts";
+import { PieChart, Pie, Cell, Legend, ResponsiveContainer, type PieLabelRenderProps } from "recharts";
 import { CATEGORY_COLORS, formatWon } from "@/lib/chartColors";
 import type { ExpenseCategory } from "@/lib/categories";
 
@@ -21,18 +21,37 @@ export default function CategoryPieChart({ data }: { data: CategoryAmount[] }) {
   const colorFor = (category: string) =>
     CATEGORY_COLORS[category as ExpenseCategory] ?? "var(--chart-text-muted)";
 
+  // recharts already computes the label anchor point (x/y/textAnchor) to
+  // match where the leader line ends — reuse it as-is so the two never
+  // drift apart, and only override fontSize (small, so the text never runs
+  // past the chart's edge on a narrow phone screen).
+  function renderLabel({ x, y, textAnchor, percent, payload }: PieLabelRenderProps) {
+    const category = (payload as CategoryAmount).category;
+    return (
+      <text x={x} y={y} fill={colorFor(category)} fontSize={10} textAnchor={textAnchor} dominantBaseline="central">
+        {`${category} ${((percent ?? 0) * 100).toFixed(0)}%`}
+      </text>
+    );
+  }
+
+  // Keyed on the dataset's shape so switching period filters forces a clean
+  // remount instead of animating between two pies — recharts can otherwise
+  // leave stale/missing leader lines when the slice count changes mid-tween.
+  const chartKey = data.map((d) => `${d.category}:${d.amount}`).join("|");
+
   return (
     <div className="flex flex-col gap-4">
       <ResponsiveContainer width="100%" height={280}>
-        <PieChart>
+        <PieChart key={chartKey} margin={{ top: 8, right: 28, bottom: 8, left: 28 }}>
           <Pie
             data={data}
             dataKey="amount"
             nameKey="category"
             cx="50%"
             cy="50%"
-            outerRadius={90}
-            label={({ payload, percent }) => `${payload.category} ${((percent ?? 0) * 100).toFixed(0)}%`}
+            outerRadius={62}
+            isAnimationActive={false}
+            label={renderLabel}
           >
             {data.map((entry) => (
               <Cell key={entry.category} fill={colorFor(entry.category)} />

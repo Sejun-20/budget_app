@@ -16,11 +16,13 @@ export default function PeriodFilter({
   defaultLabel = "기본",
   selection,
   onChange,
+  allowWeekSelection = true,
 }: {
   quickOptions?: QuickPeriod[];
   defaultLabel?: string;
   selection: PeriodSelection | null;
   onChange: (s: PeriodSelection | null) => void;
+  allowWeekSelection?: boolean;
 }) {
   const [customOpen, setCustomOpen] = useState(false);
   const [draft, setDraft] = useState<CustomPeriod>(
@@ -84,6 +86,7 @@ export default function PeriodFilter({
             setDraft(c);
             onChange({ kind: "custom", value: c });
           }}
+          showWeek={allowWeekSelection}
         />
       )}
     </div>

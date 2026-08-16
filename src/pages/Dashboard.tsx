@@ -183,7 +183,12 @@ export default function Dashboard() {
       <section className="rounded-lg border border-zinc-200 p-5 dark:border-zinc-800">
         <div className="mb-4 flex flex-col gap-3">
           <h2 className="text-sm font-medium text-zinc-700 dark:text-zinc-300">주별 수입/지출 (월요일 시작)</h2>
-          <PeriodFilter selection={weeklySelection} onChange={setWeeklySelection} defaultLabel="최근 8주" />
+          <PeriodFilter
+            selection={weeklySelection}
+            onChange={setWeeklySelection}
+            defaultLabel="최근 8주"
+            allowWeekSelection={false}
+          />
         </div>
         {weekly === null ? (
           <p className="py-8 text-center text-sm text-zinc-500">불러오는 중...</p>
@@ -196,7 +201,12 @@ export default function Dashboard() {
       <section className="rounded-lg border border-zinc-200 p-5 dark:border-zinc-800">
         <div className="mb-4 flex flex-col gap-3">
           <h2 className="text-sm font-medium text-zinc-700 dark:text-zinc-300">월별 수입/지출 추이</h2>
-          <PeriodFilter selection={monthlySelection} onChange={setMonthlySelection} defaultLabel="최근 12개월" />
+          <PeriodFilter
+            selection={monthlySelection}
+            onChange={setMonthlySelection}
+            defaultLabel="최근 6개월"
+            allowWeekSelection={false}
+          />
         </div>
         {monthly === null ? (
           <p className="py-8 text-center text-sm text-zinc-500">불러오는 중...</p>
