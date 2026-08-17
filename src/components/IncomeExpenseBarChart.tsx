@@ -1,5 +1,6 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend, LabelList, ResponsiveContainer } from "recharts";
 import { INCOME_COLOR, EXPENSE_COLOR, GRID_COLOR, AXIS_COLOR, MUTED_TEXT_COLOR } from "@/lib/chartColors";
+import { formatCompactWon } from "@/lib/money";
 
 export interface BarPoint {
   label: string;
@@ -11,15 +12,6 @@ function formatAxisTick(value: number): string {
   if (value === 0) return "0";
   if (Math.abs(value) >= 10000) return `${Math.round(value / 10000)}만`;
   return String(value);
-}
-
-function formatBarLabel(value: number): string {
-  if (!value) return "";
-  if (Math.abs(value) >= 10000) {
-    const man = value / 10000;
-    return `${Number.isInteger(man) ? man : man.toFixed(1)}만`;
-  }
-  return new Intl.NumberFormat("ko-KR").format(value);
 }
 
 export default function IncomeExpenseBarChart({ data }: { data: BarPoint[] }) {
@@ -66,10 +58,10 @@ export default function IncomeExpenseBarChart({ data }: { data: BarPoint[] }) {
       />
       <Legend />
       <Bar dataKey="income" name="수입" fill={INCOME_COLOR} radius={[3, 3, 0, 0]}>
-        <LabelList dataKey="income" position="top" formatter={(v) => formatBarLabel(Number(v))} fontSize={10} fill={MUTED_TEXT_COLOR} />
+        <LabelList dataKey="income" position="top" formatter={(v) => formatCompactWon(Number(v))} fontSize={10} fill={MUTED_TEXT_COLOR} />
       </Bar>
       <Bar dataKey="expense" name="지출" fill={EXPENSE_COLOR} radius={[3, 3, 0, 0]}>
-        <LabelList dataKey="expense" position="top" formatter={(v) => formatBarLabel(Number(v))} fontSize={10} fill={MUTED_TEXT_COLOR} />
+        <LabelList dataKey="expense" position="top" formatter={(v) => formatCompactWon(Number(v))} fontSize={10} fill={MUTED_TEXT_COLOR} />
       </Bar>
     </BarChart>
   );

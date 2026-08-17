@@ -1,12 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { hasApiKey } from "@/lib/apiKey";
-import { getCurrentMonthNet } from "@/lib/dashboard";
+import { getBalanceSummary } from "@/lib/dashboard";
 import { formatWon } from "@/lib/money";
-import { getMonthlyBudget, hasMonthlyBudget } from "@/lib/settings";
-
-const RING_RADIUS = 27;
-const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 
 function ReceiptIcon() {
   return (
@@ -80,29 +76,12 @@ const TILES = [
 
 export default function Home() {
   const [keySet, setKeySet] = useState(true);
-  const [monthNet, setMonthNet] = useState(0);
-  const [usagePercent, setUsagePercent] = useState(0);
-  const [budgetSet, setBudgetSet] = useState(false);
+  const [balance, setBalance] = useState(0);
 
   useEffect(() => {
     setKeySet(hasApiKey());
-    (async () => {
-      const [net, budgetVal, hasBudget] = await Promise.all([
-        getCurrentMonthNet(),
-        getMonthlyBudget(),
-        hasMonthlyBudget(),
-      ]);
-      setMonthNet(net.net);
-      // Usage is spend against budget, not net balance against budget — net
-      // balance can go negative and would make "usage" read as a negative
-      // percentage, which isn't meaningful here.
-      setUsagePercent(hasBudget && budgetVal > 0 ? Math.round((net.expense / budgetVal) * 100) : 0);
-      setBudgetSet(hasBudget && budgetVal > 0);
-    })();
+    getBalanceSummary().then((s) => setBalance(s.balance));
   }, []);
-
-  const ringPercent = Math.max(0, Math.min(100, usagePercent));
-  const ringOffset = RING_CIRCUMFERENCE * (1 - ringPercent / 100);
 
   return (
     <div className="flex min-h-screen flex-col" style={{ background: "var(--color-page-bg)" }}>
@@ -111,36 +90,9 @@ export default function Home() {
         style={{ background: "var(--color-primary)" }}
       >
         <h1 className="text-2xl leading-none font-bold text-white">가계부</h1>
-        <div className="flex items-center gap-[18px]">
-          <svg width="64" height="64" viewBox="0 0 64 64" className="shrink-0">
-            <circle cx="32" cy="32" r={RING_RADIUS} fill="none" stroke="rgba(255,255,255,.25)" strokeWidth="6" />
-            <circle
-              cx="32"
-              cy="32"
-              r={RING_RADIUS}
-              fill="none"
-              stroke="var(--color-gold-ring)"
-              strokeWidth="6"
-              strokeLinecap="round"
-              strokeDasharray={RING_CIRCUMFERENCE}
-              strokeDashoffset={ringOffset}
-              transform="rotate(-90 32 32)"
-            />
-            <text x="32" y="37" fontSize="15" textAnchor="middle" fill="#fff" fontWeight="700">
-              {budgetSet ? `${usagePercent}%` : "-"}
-            </text>
-          </svg>
-          <div className="flex flex-col gap-1">
-            <span className="text-xs text-white/75">이번 달 잔액</span>
-            <span className="text-[22px] font-bold text-white">{formatWon(monthNet)}</span>
-            {budgetSet ? (
-              <span className="text-[11px] text-white/60">예산 사용 {usagePercent}%</span>
-            ) : (
-              <Link to="/settings" className="text-[11px] text-white/60 underline">
-                예산 미설정 · 설정에서 추가
-              </Link>
-            )}
-          </div>
+        <div className="flex flex-col gap-1">
+          <span className="text-xs text-white/75">현재 자산</span>
+          <span className="text-[22px] font-bold text-white">{formatWon(balance)}</span>
         </div>
       </header>
 
@@ -158,25 +110,27 @@ export default function Home() {
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-3 p-5">
-        {TILES.map((t) => (
-          <Link
-            key={t.label}
-            to={t.to}
-            className="flex h-[118px] flex-col items-center gap-[9px] rounded-[20px] px-[14px] pt-[18px] pb-[14px] active:opacity-80"
-            style={{ background: t.tint }}
-          >
-            <div
-              className="flex h-[46px] w-[46px] shrink-0 items-center justify-center rounded-[14px]"
-              style={{ background: t.badge }}
+      <div className="flex flex-1 flex-col justify-center p-5">
+        <div className="grid grid-cols-2 gap-3">
+          {TILES.map((t) => (
+            <Link
+              key={t.label}
+              to={t.to}
+              className="flex h-[118px] flex-col items-center justify-center gap-[9px] rounded-[20px] px-[14px] active:opacity-80"
+              style={{ background: t.tint }}
             >
-              {t.icon}
-            </div>
-            <span className="text-center text-[12.5px] font-semibold" style={{ color: "var(--color-text)" }}>
-              {t.label}
-            </span>
-          </Link>
-        ))}
+              <div
+                className="flex h-[46px] w-[46px] shrink-0 items-center justify-center rounded-[14px]"
+                style={{ background: t.badge }}
+              >
+                {t.icon}
+              </div>
+              <span className="text-center text-[12.5px] font-semibold" style={{ color: "var(--color-text)" }}>
+                {t.label}
+              </span>
+            </Link>
+          ))}
+        </div>
       </div>
     </div>
   );

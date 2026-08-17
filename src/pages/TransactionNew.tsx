@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useSearchParams } from "react-router-dom";
-import HomeLink from "@/components/HomeLink";
+import PageHeader from "@/components/PageHeader";
 import { getIncomeCategories, getExpenseCategoryNames } from "@/lib/categories";
 import { formatAmountInput, formatWon, parseAmountInput } from "@/lib/money";
 import { insertTransaction } from "@/lib/transactions";
@@ -92,10 +92,7 @@ export default function TransactionNew() {
       className="mx-auto flex min-h-screen w-full max-w-lg flex-col gap-6 overflow-x-hidden p-6"
       style={{ background: "var(--color-page-bg)" }}
     >
-      <div className="flex items-center justify-between">
-        <h1 className="app-title text-xl font-bold">{type === "income" ? "수입 추가" : "지출 추가"}</h1>
-        <HomeLink />
-      </div>
+      <PageHeader title={type === "income" ? "수입 추가" : "지출 추가"} />
 
       <div className="field flex w-full p-1">
         <button

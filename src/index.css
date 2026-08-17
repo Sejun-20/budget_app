@@ -21,6 +21,10 @@
   --color-green-dark: oklch(0.4 0.09 150);
   --color-green-tint: oklch(0.55 0.11 150 / 0.14);
 
+  /* Used specifically for income amounts in 전체 내역 — kept distinct from
+     the brand's green (still used for the 수입 추가 tile/toggle). */
+  --color-blue: #2a78d6;
+
   --color-text: oklch(0.3 0.01 90); /* body/label text */
   --color-text-strong: oklch(0.25 0.01 90); /* titles */
   --color-text-muted: #898781;

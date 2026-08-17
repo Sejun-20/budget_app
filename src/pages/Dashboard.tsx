@@ -5,10 +5,12 @@ import type { PeriodSelection } from "@/lib/period";
 import {
   getBalanceSummary,
   getCategoryBreakdown,
+  getCurrentMonthNet,
   getWeeklySummary,
   getMonthlySummary,
   type BalanceSummary,
   type CategoryAmount,
+  type MonthNet,
   type WeeklyPoint,
   type MonthlyPoint,
 } from "@/lib/dashboard";
@@ -16,7 +18,7 @@ import { setInitialBalance } from "@/lib/settings";
 import CategoryPieChart from "@/components/CategoryPieChart";
 import IncomeExpenseBarChart, { type BarPoint } from "@/components/IncomeExpenseBarChart";
 import PeriodFilter from "@/components/PeriodFilter";
-import HomeLink from "@/components/HomeLink";
+import PageHeader from "@/components/PageHeader";
 
 function formatWeekLabel(weekStart: string): string {
   const [, m, d] = weekStart.split("-");
@@ -30,6 +32,7 @@ function formatMonthLabel(month: string): string {
 
 export default function Dashboard() {
   const [summary, setSummary] = useState<BalanceSummary | null>(null);
+  const [monthNet, setMonthNet] = useState<MonthNet | null>(null);
   const [expenseBreakdown, setExpenseBreakdown] = useState<CategoryAmount[] | null>(null);
   const [incomeBreakdown, setIncomeBreakdown] = useState<CategoryAmount[] | null>(null);
   const [weekly, setWeekly] = useState<WeeklyPoint[] | null>(null);
@@ -61,6 +64,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     loadSummary();
+    getCurrentMonthNet().then(setMonthNet);
     getExpenseCategoryColorMap().then(setExpenseColorMap);
     getIncomeCategoryColorMap().then(setIncomeColorMap);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -114,10 +118,7 @@ export default function Dashboard() {
 
   return (
     <div className="mx-auto flex min-h-screen max-w-2xl flex-col gap-6 p-6" style={{ background: "var(--color-page-bg)" }}>
-      <div className="flex items-center justify-between">
-        <h1 className="app-title text-xl font-bold">대시보드</h1>
-        <HomeLink />
-      </div>
+      <PageHeader title="대시보드" />
 
       {/* 현재 자산 */}
       <section className="app-card p-5">
@@ -145,10 +146,10 @@ export default function Dashboard() {
           <div>
             <p className="app-muted text-sm">현재 자산</p>
             <p className="app-title text-3xl font-bold tabular-nums">{summary ? formatWon(summary.balance) : "..."}</p>
-            {summary && (
+            {summary && monthNet && (
               <p className="app-muted mt-1 text-xs">
-                초기 {formatWon(summary.initialBalance)} + 수입 {formatWon(summary.totalIncome)} − 지출{" "}
-                {formatWon(summary.totalExpense)}
+                이월 {formatWon(summary.balance - monthNet.income + monthNet.expense)} + 이번 달 수입{" "}
+                {formatWon(monthNet.income)} − 이번 달 지출 {formatWon(monthNet.expense)}
               </p>
             )}
           </div>

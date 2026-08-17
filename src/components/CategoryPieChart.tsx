@@ -24,13 +24,16 @@ export default function CategoryPieChart({
   const colorFor = (category: string) => colorMap[category] ?? "var(--chart-text-muted)";
 
   // recharts already computes the label anchor point (x/y/textAnchor) to
-  // match where the leader line ends — reuse it as-is so the two never
-  // drift apart, and only override fontSize (small, so the text never runs
-  // past the chart's edge on a narrow phone screen).
+  // match where the leader line ends — reuse it as the base so the two
+  // never drift apart, but nudge the text a few px further out so the line
+  // doesn't run right up against the letters.
+  const LABEL_GAP = 6;
   function renderLabel({ x, y, textAnchor, percent, payload }: PieLabelRenderProps) {
     const category = (payload as CategoryAmount).category;
+    const baseX = Number(x) || 0;
+    const gappedX = textAnchor === "end" ? baseX - LABEL_GAP : textAnchor === "start" ? baseX + LABEL_GAP : baseX;
     return (
-      <text x={x} y={y} fill={colorFor(category)} fontSize={10} textAnchor={textAnchor} dominantBaseline="central">
+      <text x={gappedX} y={y} fill={colorFor(category)} fontSize={10} textAnchor={textAnchor} dominantBaseline="central">
         {`${category} ${((percent ?? 0) * 100).toFixed(0)}%`}
       </text>
     );

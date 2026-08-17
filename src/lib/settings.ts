@@ -23,16 +23,3 @@ export async function getInitialBalance(): Promise<number> {
 export async function setInitialBalance(amount: number): Promise<void> {
   await setSetting("initial_balance", String(Math.round(amount)));
 }
-
-export async function hasMonthlyBudget(): Promise<boolean> {
-  return (await getSetting("monthly_budget")) !== null;
-}
-
-export async function getMonthlyBudget(): Promise<number> {
-  const value = await getSetting("monthly_budget");
-  return value ? Number(value) : 0;
-}
-
-export async function setMonthlyBudget(amount: number): Promise<void> {
-  await setSetting("monthly_budget", String(Math.round(amount)));
-}

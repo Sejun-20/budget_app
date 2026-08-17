@@ -2,14 +2,7 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { getApiKey, setApiKey, clearApiKey } from "@/lib/apiKey";
 import { exportBackup, importBackup } from "@/lib/backup";
 import { formatAmountInput, parseAmountInput } from "@/lib/money";
-import {
-  getInitialBalance,
-  hasInitialBalance,
-  setInitialBalance,
-  getMonthlyBudget,
-  hasMonthlyBudget,
-  setMonthlyBudget,
-} from "@/lib/settings";
+import { getInitialBalance, hasInitialBalance, setInitialBalance } from "@/lib/settings";
 import {
   getIncomeCategories,
   getExpenseCategories,
@@ -25,7 +18,7 @@ import {
 } from "@/lib/categories";
 import { getExpenseCategoryColorMap, getIncomeCategoryColorMap } from "@/lib/chartColors";
 import CategoryManager from "@/components/CategoryManager";
-import HomeLink from "@/components/HomeLink";
+import PageHeader from "@/components/PageHeader";
 
 export default function Settings() {
   const [keyInput, setKeyInput] = useState("");
@@ -35,10 +28,6 @@ export default function Settings() {
   const [balanceInput, setBalanceInput] = useState("");
   const [balanceSaved, setBalanceSaved] = useState(false);
   const [balanceHasValue, setBalanceHasValue] = useState(false);
-
-  const [budgetInput, setBudgetInput] = useState("");
-  const [budgetSaved, setBudgetSaved] = useState(false);
-  const [budgetHasValue, setBudgetHasValue] = useState(false);
 
   const [incomeCategories, setIncomeCategories] = useState<string[]>([]);
   const [expenseCategories, setExpenseCategories] = useState<string[]>([]);
@@ -70,10 +59,6 @@ export default function Settings() {
         setBalanceHasValue(true);
         setBalanceInput(String(await getInitialBalance()));
       }
-      if (await hasMonthlyBudget()) {
-        setBudgetHasValue(true);
-        setBudgetInput(String(await getMonthlyBudget()));
-      }
     })();
   }, []);
 
@@ -102,22 +87,11 @@ export default function Settings() {
     setTimeout(() => setBalanceSaved(false), 2000);
   }
 
-  async function handleSaveBudget(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const amount = parseAmountInput(budgetInput);
-    await setMonthlyBudget(amount);
-    setBudgetHasValue(true);
-    setBudgetSaved(true);
-    setTimeout(() => setBudgetSaved(false), 2000);
-  }
-
   async function handleRestoreFile(file: File | undefined) {
     if (!file) return;
     if (restoreInputRef.current) restoreInputRef.current.value = "";
     if (
-      !window.confirm(
-        "백업 파일 내용으로 현재 데이터(거래 내역, 카테고리, 초기 자산, 예산)를 덮어씁니다. 계속할까요?"
-      )
+      !window.confirm("백업 파일 내용으로 현재 데이터(거래 내역, 카테고리, 초기 자산)를 덮어씁니다. 계속할까요?")
     ) {
       return;
     }
@@ -136,10 +110,7 @@ export default function Settings() {
 
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-lg flex-col gap-8 p-6" style={{ background: "var(--color-page-bg)" }}>
-      <div className="flex items-center justify-between">
-        <h1 className="app-title text-xl font-bold">설정</h1>
-        <HomeLink />
-      </div>
+      <PageHeader title="설정" />
 
       <section className="flex flex-col gap-3">
         <h2 className="app-title text-sm font-semibold">Claude API 키</h2>
@@ -201,28 +172,9 @@ export default function Settings() {
       </section>
 
       <section className="flex flex-col gap-3">
-        <h2 className="app-title text-sm font-semibold">이번 달 예산</h2>
-        <p className="app-muted text-xs">홈 화면의 예산 사용률(도넛 그래프)에 사용됩니다. 매달 초기화되지 않고 같은 값이 계속 적용됩니다.</p>
-        <form onSubmit={handleSaveBudget} className="flex flex-col gap-2">
-          <input
-            type="text"
-            inputMode="numeric"
-            value={formatAmountInput(budgetInput)}
-            onChange={(e) => setBudgetInput(e.target.value.replace(/[^\d]/g, ""))}
-            placeholder="예: 1,000,000"
-            className="field w-full min-w-0 px-3 py-2 text-sm"
-          />
-          <button type="submit" className="btn-outline w-full px-4 py-2 text-sm">
-            {budgetHasValue ? "예산 수정" : "예산 저장"}
-          </button>
-          {budgetSaved && <p className="text-sm" style={{ color: "var(--color-green)" }}>저장되었습니다.</p>}
-        </form>
-      </section>
-
-      <section className="flex flex-col gap-3">
         <h2 className="app-title text-sm font-semibold">데이터 백업</h2>
         <p className="app-muted text-xs">
-          이 앱의 모든 데이터(거래 내역, 카테고리, 초기 자산, 예산)는 서버가 아니라 <strong>이 기기의 브라우저
+          이 앱의 모든 데이터(거래 내역, 카테고리, 초기 자산)는 서버가 아니라 <strong>이 기기의 브라우저
           저장소(IndexedDB)</strong>에만 저장됩니다. 다른 기기와 자동으로 동기화되지 않고, 브라우저 데이터를 지우거나
           기기를 변경/초기화하면 데이터가 사라질 수 있으니 주기적으로 백업하는 것을 권장합니다. (Claude API 키는
           보안을 위해 백업 파일에 포함되지 않습니다.)

@@ -6,7 +6,7 @@ import { prepareImageForClaude } from "@/lib/image";
 import { extractReceipt } from "@/lib/claude";
 import { insertTransaction } from "@/lib/transactions";
 import { hasApiKey } from "@/lib/apiKey";
-import HomeLink from "@/components/HomeLink";
+import PageHeader from "@/components/PageHeader";
 
 interface Draft {
   filename: string;
@@ -144,10 +144,7 @@ export default function ReceiptUpload() {
 
   return (
     <div className="mx-auto flex min-h-screen max-w-lg flex-col gap-6 p-6" style={{ background: "var(--color-page-bg)" }}>
-      <div className="flex items-center justify-between">
-        <h1 className="app-title text-xl font-bold">영수증 업로드</h1>
-        <HomeLink />
-      </div>
+      <PageHeader title="영수증 업로드" />
 
       {phase === "idle" && (
         <div className="flex flex-col gap-4">
