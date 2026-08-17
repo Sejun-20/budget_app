@@ -8,6 +8,10 @@
 
   --color-primary: oklch(0.4 0.09 210); /* deep teal */
   --color-primary-tint: oklch(0.4 0.09 210 / 0.08);
+  --color-primary-soft: oklch(0.58 0.08 210); /* lighter teal, for the 영수증 tile badge */
+
+  --color-gray: oklch(0.55 0.008 90); /* 설정 tile badge */
+  --color-gray-tint: oklch(0.55 0.008 90 / 0.12);
 
   --color-gold: oklch(0.75 0.15 85); /* badge */
   --color-gold-ring: oklch(0.8 0.14 85); /* progress ring */
