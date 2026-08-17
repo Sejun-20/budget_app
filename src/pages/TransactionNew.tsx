@@ -38,6 +38,15 @@ export default function TransactionNew() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // React Router keeps this component mounted across query-string-only
+  // navigation (e.g. tapping 수입 추가 then 지출 추가 from Home) — resync
+  // `type` whenever the URL's ?type= changes instead of only reading it once.
+  useEffect(() => {
+    const nextType: TxType = searchParams.get("type") === "income" ? "income" : "expense";
+    if (nextType !== type) handleTypeChange(nextType);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
   function handleTypeChange(next: TxType) {
     setType(next);
     const nextCategories = next === "income" ? incomeCategories : expenseCategories;
@@ -79,32 +88,37 @@ export default function TransactionNew() {
   }
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-lg flex-col gap-6 overflow-x-hidden p-6">
+    <div
+      className="mx-auto flex min-h-screen w-full max-w-lg flex-col gap-6 overflow-x-hidden p-6"
+      style={{ background: "var(--color-page-bg)" }}
+    >
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">{type === "income" ? "수입 추가" : "지출 추가"}</h1>
+        <h1 className="app-title text-xl font-bold">{type === "income" ? "수입 추가" : "지출 추가"}</h1>
         <HomeLink />
       </div>
 
-      <div className="flex w-full rounded border border-zinc-300 p-1 dark:border-zinc-700">
+      <div className="field flex w-full p-1">
         <button
           type="button"
           onClick={() => handleTypeChange("expense")}
-          className={`flex-1 rounded px-3 py-2 text-sm font-medium ${
+          className="flex-1 rounded px-3 py-2 text-sm font-medium"
+          style={
             type === "expense"
-              ? "bg-black text-white dark:bg-white dark:text-black"
-              : "text-zinc-600 dark:text-zinc-400"
-          }`}
+              ? { background: "var(--color-red)", color: "#fff" }
+              : { color: "var(--color-text-muted)" }
+          }
         >
           지출
         </button>
         <button
           type="button"
           onClick={() => handleTypeChange("income")}
-          className={`flex-1 rounded px-3 py-2 text-sm font-medium ${
+          className="flex-1 rounded px-3 py-2 text-sm font-medium"
+          style={
             type === "income"
-              ? "bg-black text-white dark:bg-white dark:text-black"
-              : "text-zinc-600 dark:text-zinc-400"
-          }`}
+              ? { background: "var(--color-green)", color: "#fff" }
+              : { color: "var(--color-text-muted)" }
+          }
         >
           수입
         </button>
@@ -113,11 +127,7 @@ export default function TransactionNew() {
       <form onSubmit={handleSubmit} className="flex w-full min-w-0 flex-col gap-4">
         <label className="flex w-full min-w-0 flex-col gap-1 text-sm">
           카테고리
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className="w-full min-w-0 rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
-          >
+          <select value={category} onChange={(e) => setCategory(e.target.value)} className="field w-full min-w-0 px-3 py-2">
             {categories.map((c) => (
               <option key={c} value={c}>
                 {c}
@@ -133,7 +143,7 @@ export default function TransactionNew() {
             inputMode="numeric"
             value={formatAmountInput(amount)}
             onChange={(e) => setAmount(e.target.value.replace(/[^\d]/g, ""))}
-            className="w-full min-w-0 rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+            className="field w-full min-w-0 px-3 py-2"
             required
           />
         </label>
@@ -144,7 +154,7 @@ export default function TransactionNew() {
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+            className="field px-3 py-2"
             required
           />
         </label>
@@ -155,18 +165,14 @@ export default function TransactionNew() {
             type="text"
             value={memo}
             onChange={(e) => setMemo(e.target.value)}
-            className="w-full min-w-0 rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+            className="field w-full min-w-0 px-3 py-2"
           />
         </label>
 
-        {error && <p className="break-words text-sm text-red-600">{error}</p>}
-        {successMsg && <p className="break-words text-sm text-green-600">{successMsg}</p>}
+        {error && <p className="break-words text-sm" style={{ color: "var(--color-red)" }}>{error}</p>}
+        {successMsg && <p className="break-words text-sm" style={{ color: "var(--color-green)" }}>{successMsg}</p>}
 
-        <button
-          type="submit"
-          disabled={submitting}
-          className="w-full rounded bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-50 dark:bg-white dark:text-black"
-        >
+        <button type="submit" disabled={submitting} className="btn-primary w-full px-4 py-2 text-sm">
           저장
         </button>
       </form>

@@ -18,7 +18,7 @@ export default function CategoryPieChart({
   const total = data.reduce((sum, d) => sum + d.amount, 0);
 
   if (data.length === 0 || total === 0) {
-    return <p className="py-8 text-center text-sm text-zinc-500 dark:text-zinc-400">{emptyMessage}</p>;
+    return <p className="app-muted py-8 text-center text-sm">{emptyMessage}</p>;
   }
 
   const colorFor = (category: string) => colorMap[category] ?? "var(--chart-text-muted)";
@@ -65,7 +65,7 @@ export default function CategoryPieChart({
 
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-zinc-200 text-left text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
+          <tr className="app-muted text-left" style={{ borderBottom: "1px solid var(--color-border)" }}>
             <th className="py-1 font-normal">카테고리</th>
             <th className="py-1 text-right font-normal">금액</th>
             <th className="py-1 text-right font-normal">비율</th>
@@ -73,7 +73,7 @@ export default function CategoryPieChart({
         </thead>
         <tbody>
           {data.map((d) => (
-            <tr key={d.category} className="border-b border-zinc-100 dark:border-zinc-900">
+            <tr key={d.category} style={{ borderBottom: "1px solid var(--color-border)" }}>
               <td className="flex items-center gap-2 py-1.5">
                 <span
                   className="inline-block h-2.5 w-2.5 rounded-full"
@@ -82,9 +82,7 @@ export default function CategoryPieChart({
                 {d.category}
               </td>
               <td className="py-1.5 text-right tabular-nums">{formatWon(d.amount)}</td>
-              <td className="py-1.5 text-right tabular-nums text-zinc-500 dark:text-zinc-400">
-                {((d.amount / total) * 100).toFixed(1)}%
-              </td>
+              <td className="app-muted py-1.5 text-right tabular-nums">{((d.amount / total) * 100).toFixed(1)}%</td>
             </tr>
           ))}
         </tbody>

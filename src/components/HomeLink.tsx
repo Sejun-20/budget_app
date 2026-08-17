@@ -5,7 +5,8 @@ export default function HomeLink() {
     <Link
       to="/"
       aria-label="홈으로"
-      className="inline-flex items-center justify-center rounded p-1.5 text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+      className="inline-flex items-center justify-center rounded p-1.5"
+      style={{ color: "var(--color-primary)" }}
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"

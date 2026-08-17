@@ -1,12 +1,36 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* design handoff: design_handoff_home_dashboard (2a) — light-only palette */
+  --color-page-bg: oklch(0.97 0.004 90);
+  --color-card-bg: #ffffff;
+  --color-border: oklch(0.9 0.005 90);
 
-  /* dataviz: validated categorical palette (light) */
-  --chart-income: #2a78d6;
-  --chart-expense: #eb6834;
+  --color-primary: oklch(0.4 0.09 210); /* deep teal */
+  --color-primary-tint: oklch(0.4 0.09 210 / 0.08);
+
+  --color-gold: oklch(0.75 0.15 85); /* badge */
+  --color-gold-ring: oklch(0.8 0.14 85); /* progress ring */
+  --color-gold-tint: oklch(0.8 0.14 85 / 0.18);
+
+  --color-red: oklch(0.62 0.13 25); /* terracotta */
+  --color-red-dark: oklch(0.42 0.1 25);
+  --color-red-tint: oklch(0.6 0.1 25 / 0.12);
+
+  --color-green: oklch(0.55 0.11 150);
+  --color-green-dark: oklch(0.4 0.09 150);
+  --color-green-tint: oklch(0.55 0.11 150 / 0.14);
+
+  --color-text: oklch(0.3 0.01 90); /* body/label text */
+  --color-text-strong: oklch(0.25 0.01 90); /* titles */
+  --color-text-muted: #898781;
+
+  /* dataviz: validated categorical palette — independent of the brand
+     tokens above; identity-mapped per category, not restyled by the
+     rebrand. Income/expense reuse the brand's green/red accents since
+     they're a fixed two-way split, not an open categorical set. */
+  --chart-income: var(--color-green);
+  --chart-expense: var(--color-red);
   --chart-cat-1: #2a78d6;
   --chart-cat-2: #eb6834;
   --chart-cat-3: #1baf7a;
@@ -15,33 +39,13 @@
   --chart-cat-6: #008300;
   --chart-grid: #e1e0d9;
   --chart-axis: #c3c2b7;
-  --chart-text-muted: #898781;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-
-    /* dataviz: validated categorical palette (dark) */
-    --chart-income: #3987e5;
-    --chart-expense: #d95926;
-    --chart-cat-1: #3987e5;
-    --chart-cat-2: #d95926;
-    --chart-cat-3: #199e70;
-    --chart-cat-4: #c98500;
-    --chart-cat-5: #d55181;
-    --chart-cat-6: #008300;
-    --chart-grid: #2c2c2a;
-    --chart-axis: #383835;
-    --chart-text-muted: #898781;
-  }
+  --chart-text-muted: var(--color-text-muted);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--color-page-bg);
+  color: var(--color-text);
+  font-family: "Pretendard", "Apple SD Gothic Neo", Helvetica, Arial, sans-serif;
   margin: 0;
 }
 
@@ -65,6 +69,49 @@ textarea {
 input[type="date"] {
   width: 1px;
   min-width: 100%;
+}
+
+/* Shared building blocks for the design-handoff visual language (teal
+   primary, flat cards, no shadows) so every page composes the same look
+   instead of repeating raw tokens. */
+.app-card {
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 24px;
+}
+
+.app-title {
+  color: var(--color-text-strong);
+}
+
+.app-muted {
+  color: var(--color-text-muted);
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: #fff;
+  border-radius: 14px;
+  font-weight: 600;
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  border-radius: 14px;
+  font-weight: 600;
+}
+
+.field {
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  color: var(--color-text);
 }
 
 /* Charts aren't interactive controls — remove the tap-highlight box and

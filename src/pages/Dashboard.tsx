@@ -113,17 +113,17 @@ export default function Dashboard() {
     monthly?.map((m) => ({ label: formatMonthLabel(m.month), income: m.income, expense: m.expense })) ?? [];
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-2xl flex-col gap-8 p-6">
+    <div className="mx-auto flex min-h-screen max-w-2xl flex-col gap-6 p-6" style={{ background: "var(--color-page-bg)" }}>
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">대시보드</h1>
+        <h1 className="app-title text-xl font-bold">대시보드</h1>
         <HomeLink />
       </div>
 
       {/* 현재 자산 */}
-      <section className="rounded-lg border border-zinc-200 p-5 dark:border-zinc-800">
+      <section className="app-card p-5">
         {editingBalance ? (
           <form onSubmit={saveInitialBalance} className="flex flex-col gap-3">
-            <label className="flex flex-col gap-1 text-sm">
+            <label className="app-muted flex flex-col gap-1 text-sm">
               앱을 처음 사용하는 시점의 잔액을 입력하세요 (원)
               <input
                 type="text"
@@ -131,26 +131,22 @@ export default function Dashboard() {
                 value={formatAmountInput(balanceInput)}
                 onChange={(e) => setBalanceInput(e.target.value.replace(/[^\d]/g, ""))}
                 placeholder="예: 1,000,000"
-                className="rounded border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+                className="field px-3 py-2"
                 required
                 autoFocus
               />
             </label>
-            {balanceError && <p className="text-sm text-red-600">{balanceError}</p>}
-            <button
-              type="submit"
-              disabled={savingBalance}
-              className="rounded bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-50 dark:bg-white dark:text-black"
-            >
+            {balanceError && <p className="text-sm" style={{ color: "var(--color-red)" }}>{balanceError}</p>}
+            <button type="submit" disabled={savingBalance} className="btn-primary px-4 py-2 text-sm">
               저장
             </button>
           </form>
         ) : (
           <div>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">현재 자산</p>
-            <p className="text-3xl font-semibold tabular-nums">{summary ? formatWon(summary.balance) : "..."}</p>
+            <p className="app-muted text-sm">현재 자산</p>
+            <p className="app-title text-3xl font-bold tabular-nums">{summary ? formatWon(summary.balance) : "..."}</p>
             {summary && (
-              <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+              <p className="app-muted mt-1 text-xs">
                 초기 {formatWon(summary.initialBalance)} + 수입 {formatWon(summary.totalIncome)} − 지출{" "}
                 {formatWon(summary.totalExpense)}
               </p>
@@ -160,9 +156,9 @@ export default function Dashboard() {
       </section>
 
       {/* 카테고리별 지출 비율 */}
-      <section className="rounded-lg border border-zinc-200 p-5 dark:border-zinc-800">
+      <section className="app-card p-5">
         <div className="mb-4 flex flex-col gap-3">
-          <h2 className="text-sm font-medium text-zinc-700 dark:text-zinc-300">카테고리별 지출 비율</h2>
+          <h2 className="app-title text-sm font-semibold">카테고리별 지출 비율</h2>
           <PeriodFilter
             quickOptions={["week", "month", "all"]}
             selection={expenseBreakdownSelection}
@@ -170,16 +166,16 @@ export default function Dashboard() {
           />
         </div>
         {expenseBreakdown === null ? (
-          <p className="py-8 text-center text-sm text-zinc-500">불러오는 중...</p>
+          <p className="app-muted py-8 text-center text-sm">불러오는 중...</p>
         ) : (
           <CategoryPieChart data={expenseBreakdown} colorMap={expenseColorMap} />
         )}
       </section>
 
       {/* 카테고리별 수입 비율 */}
-      <section className="rounded-lg border border-zinc-200 p-5 dark:border-zinc-800">
+      <section className="app-card p-5">
         <div className="mb-4 flex flex-col gap-3">
-          <h2 className="text-sm font-medium text-zinc-700 dark:text-zinc-300">카테고리별 수입 비율</h2>
+          <h2 className="app-title text-sm font-semibold">카테고리별 수입 비율</h2>
           <PeriodFilter
             quickOptions={["week", "month", "all"]}
             selection={incomeBreakdownSelection}
@@ -187,7 +183,7 @@ export default function Dashboard() {
           />
         </div>
         {incomeBreakdown === null ? (
-          <p className="py-8 text-center text-sm text-zinc-500">불러오는 중...</p>
+          <p className="app-muted py-8 text-center text-sm">불러오는 중...</p>
         ) : (
           <CategoryPieChart
             data={incomeBreakdown}
@@ -198,9 +194,9 @@ export default function Dashboard() {
       </section>
 
       {/* 주별 요약 */}
-      <section className="rounded-lg border border-zinc-200 p-5 dark:border-zinc-800">
+      <section className="app-card p-5">
         <div className="mb-4 flex flex-col gap-3">
-          <h2 className="text-sm font-medium text-zinc-700 dark:text-zinc-300">주별 수입/지출 (월요일 시작)</h2>
+          <h2 className="app-title text-sm font-semibold">주별 수입/지출 (월요일 시작)</h2>
           <PeriodFilter
             selection={weeklySelection}
             onChange={setWeeklySelection}
@@ -209,16 +205,16 @@ export default function Dashboard() {
           />
         </div>
         {weekly === null ? (
-          <p className="py-8 text-center text-sm text-zinc-500">불러오는 중...</p>
+          <p className="app-muted py-8 text-center text-sm">불러오는 중...</p>
         ) : (
           <IncomeExpenseBarChart data={weeklyBars} />
         )}
       </section>
 
       {/* 월별 요약 */}
-      <section className="rounded-lg border border-zinc-200 p-5 dark:border-zinc-800">
+      <section className="app-card p-5">
         <div className="mb-4 flex flex-col gap-3">
-          <h2 className="text-sm font-medium text-zinc-700 dark:text-zinc-300">월별 수입/지출 추이</h2>
+          <h2 className="app-title text-sm font-semibold">월별 수입/지출 추이</h2>
           <PeriodFilter
             selection={monthlySelection}
             onChange={setMonthlySelection}
@@ -227,7 +223,7 @@ export default function Dashboard() {
           />
         </div>
         {monthly === null ? (
-          <p className="py-8 text-center text-sm text-zinc-500">불러오는 중...</p>
+          <p className="app-muted py-8 text-center text-sm">불러오는 중...</p>
         ) : (
           <IncomeExpenseBarChart data={monthlyBars} />
         )}

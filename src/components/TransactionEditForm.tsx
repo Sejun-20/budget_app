@@ -84,36 +84,34 @@ export default function TransactionEditForm({
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-      <div className="flex rounded border border-zinc-300 p-1 dark:border-zinc-700">
+      <div className="field flex p-1">
         <button
           type="button"
           onClick={() => handleTypeChange("expense")}
-          className={`flex-1 rounded px-3 py-1.5 text-sm font-medium ${
+          className="flex-1 rounded px-3 py-1.5 text-sm font-medium"
+          style={
             type === "expense"
-              ? "bg-black text-white dark:bg-white dark:text-black"
-              : "text-zinc-600 dark:text-zinc-400"
-          }`}
+              ? { background: "var(--color-red)", color: "#fff" }
+              : { color: "var(--color-text-muted)" }
+          }
         >
           지출
         </button>
         <button
           type="button"
           onClick={() => handleTypeChange("income")}
-          className={`flex-1 rounded px-3 py-1.5 text-sm font-medium ${
+          className="flex-1 rounded px-3 py-1.5 text-sm font-medium"
+          style={
             type === "income"
-              ? "bg-black text-white dark:bg-white dark:text-black"
-              : "text-zinc-600 dark:text-zinc-400"
-          }`}
+              ? { background: "var(--color-green)", color: "#fff" }
+              : { color: "var(--color-text-muted)" }
+          }
         >
           수입
         </button>
       </div>
 
-      <select
-        value={category}
-        onChange={(e) => setCategory(e.target.value)}
-        className="rounded border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
-      >
+      <select value={category} onChange={(e) => setCategory(e.target.value)} className="field px-3 py-2 text-sm">
         {selectableCategories.map((c) => (
           <option key={c} value={c}>
             {c}
@@ -127,24 +125,18 @@ export default function TransactionEditForm({
         value={formatAmountInput(amount)}
         onChange={(e) => setAmount(e.target.value.replace(/[^\d]/g, ""))}
         placeholder="금액"
-        className="rounded border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+        className="field px-3 py-2 text-sm"
         required
       />
 
-      <input
-        type="date"
-        value={date}
-        onChange={(e) => setDate(e.target.value)}
-        className="rounded border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
-        required
-      />
+      <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="field px-3 py-2 text-sm" required />
 
       <input
         type="text"
         value={merchant}
         onChange={(e) => setMerchant(e.target.value)}
         placeholder="상호명 (선택)"
-        className="rounded border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+        className="field px-3 py-2 text-sm"
       />
 
       <input
@@ -152,24 +144,16 @@ export default function TransactionEditForm({
         value={memo}
         onChange={(e) => setMemo(e.target.value)}
         placeholder="메모 (선택)"
-        className="rounded border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+        className="field px-3 py-2 text-sm"
       />
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm" style={{ color: "var(--color-red)" }}>{error}</p>}
 
       <div className="flex gap-2">
-        <button
-          type="submit"
-          disabled={saving}
-          className="flex-1 rounded bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-50 dark:bg-white dark:text-black"
-        >
+        <button type="submit" disabled={saving} className="btn-primary flex-1 px-4 py-2 text-sm">
           저장
         </button>
-        <button
-          type="button"
-          onClick={onCancel}
-          className="rounded border border-zinc-300 px-4 py-2 text-sm dark:border-zinc-700"
-        >
+        <button type="button" onClick={onCancel} className="btn-outline px-4 py-2 text-sm">
           취소
         </button>
       </div>

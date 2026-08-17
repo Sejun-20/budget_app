@@ -3,6 +3,7 @@ import { weeksInMonth, type CustomPeriod } from "@/lib/period";
 const CURRENT_YEAR = new Date().getFullYear();
 const YEAR_OPTIONS = Array.from({ length: 11 }, (_, i) => CURRENT_YEAR - i);
 const MONTH_OPTIONS = Array.from({ length: 12 }, (_, i) => i + 1);
+const SELECT_CLASS = "field min-w-0 flex-1 px-1 py-0.5 text-[10px]";
 
 function formatWeekLabel(weekStart: string): string {
   const [y, m, d] = weekStart.split("-").map(Number);
@@ -23,12 +24,8 @@ export default function CustomPeriodPicker({
   showWeek?: boolean;
 }) {
   return (
-    <div className="flex flex-nowrap items-center gap-1 rounded border border-zinc-200 p-1.5 dark:border-zinc-800">
-      <select
-        value={value.year}
-        onChange={(e) => onChange({ year: Number(e.target.value) })}
-        className="min-w-0 flex-1 rounded border border-zinc-300 px-1 py-0.5 text-[10px] dark:border-zinc-700 dark:bg-zinc-900"
-      >
+    <div className="field flex flex-nowrap items-center gap-1 p-1.5">
+      <select value={value.year} onChange={(e) => onChange({ year: Number(e.target.value) })} className={SELECT_CLASS}>
         {YEAR_OPTIONS.map((y) => (
           <option key={y} value={y}>
             {y}년
@@ -39,7 +36,7 @@ export default function CustomPeriodPicker({
       <select
         value={value.month ?? ""}
         onChange={(e) => onChange({ year: value.year, month: e.target.value ? Number(e.target.value) : undefined })}
-        className="min-w-0 flex-1 rounded border border-zinc-300 px-1 py-0.5 text-[10px] dark:border-zinc-700 dark:bg-zinc-900"
+        className={SELECT_CLASS}
       >
         <option value="">전체</option>
         {MONTH_OPTIONS.map((m) => (
@@ -53,7 +50,7 @@ export default function CustomPeriodPicker({
         <select
           value={value.week ?? ""}
           onChange={(e) => onChange({ year: value.year, month: value.month, week: e.target.value || undefined })}
-          className="min-w-0 flex-1 rounded border border-zinc-300 px-1 py-0.5 text-[10px] dark:border-zinc-700 dark:bg-zinc-900"
+          className={SELECT_CLASS}
         >
           <option value="">전체</option>
           {weeksInMonth(value.year, value.month).map((w) => (

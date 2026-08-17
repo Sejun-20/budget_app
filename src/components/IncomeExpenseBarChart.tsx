@@ -27,7 +27,7 @@ export default function IncomeExpenseBarChart({ data }: { data: BarPoint[] }) {
 
   if (!hasData) {
     return (
-      <p className="py-8 text-center text-sm text-zinc-500 dark:text-zinc-400">
+      <p className="app-muted py-8 text-center text-sm">
         데이터가 없습니다.
       </p>
     );

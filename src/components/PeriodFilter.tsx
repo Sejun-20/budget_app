@@ -4,6 +4,9 @@ import type { PeriodSelection, QuickPeriod, CustomPeriod } from "@/lib/period";
 
 const QUICK_LABEL: Record<QuickPeriod, string> = { week: "이번 주", month: "이번 달", all: "전체" };
 
+const ACTIVE_STYLE = { background: "var(--color-primary)", color: "#fff" };
+const INACTIVE_STYLE = { color: "var(--color-text-muted)" };
+
 /**
  * Period selector shared by the category-breakdown, weekly, and monthly
  * dashboard sections. With `quickOptions` it renders 이번주/이번달/전체 plus
@@ -33,7 +36,7 @@ export default function PeriodFilter({
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex gap-1 rounded border border-zinc-300 p-0.5 dark:border-zinc-700">
+      <div className="field flex gap-1 p-0.5">
         {quickOptions ? (
           quickOptions.map((q) => (
             <button
@@ -43,11 +46,8 @@ export default function PeriodFilter({
                 setCustomOpen(false);
                 onChange({ kind: "quick", value: q });
               }}
-              className={`min-w-0 flex-1 rounded px-1 py-1 text-center text-xs font-medium ${
-                selection?.kind === "quick" && selection.value === q
-                  ? "bg-black text-white dark:bg-white dark:text-black"
-                  : "text-zinc-600 dark:text-zinc-400"
-              }`}
+              className="min-w-0 flex-1 rounded px-1 py-1 text-center text-xs font-medium"
+              style={selection?.kind === "quick" && selection.value === q ? ACTIVE_STYLE : INACTIVE_STYLE}
             >
               {QUICK_LABEL[q]}
             </button>
@@ -59,11 +59,8 @@ export default function PeriodFilter({
               setCustomOpen(false);
               onChange(null);
             }}
-            className={`min-w-0 flex-1 rounded px-1 py-1 text-center text-xs font-medium ${
-              selection === null
-                ? "bg-black text-white dark:bg-white dark:text-black"
-                : "text-zinc-600 dark:text-zinc-400"
-            }`}
+            className="min-w-0 flex-1 rounded px-1 py-1 text-center text-xs font-medium"
+            style={selection === null ? ACTIVE_STYLE : INACTIVE_STYLE}
           >
             {defaultLabel}
           </button>
@@ -71,9 +68,8 @@ export default function PeriodFilter({
         <button
           type="button"
           onClick={() => setCustomOpen((v) => !v)}
-          className={`min-w-0 flex-1 rounded px-1 py-1 text-center text-xs font-medium ${
-            isCustomActive ? "bg-black text-white dark:bg-white dark:text-black" : "text-zinc-600 dark:text-zinc-400"
-          }`}
+          className="min-w-0 flex-1 rounded px-1 py-1 text-center text-xs font-medium"
+          style={isCustomActive ? ACTIVE_STYLE : INACTIVE_STYLE}
         >
           기간 설정
         </button>

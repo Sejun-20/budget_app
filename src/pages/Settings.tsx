@@ -1,7 +1,15 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { getApiKey, setApiKey, clearApiKey } from "@/lib/apiKey";
+import { exportBackup, importBackup } from "@/lib/backup";
 import { formatAmountInput, parseAmountInput } from "@/lib/money";
-import { getInitialBalance, hasInitialBalance, setInitialBalance } from "@/lib/settings";
+import {
+  getInitialBalance,
+  hasInitialBalance,
+  setInitialBalance,
+  getMonthlyBudget,
+  hasMonthlyBudget,
+  setMonthlyBudget,
+} from "@/lib/settings";
 import {
   getIncomeCategories,
   getExpenseCategories,
@@ -28,10 +36,18 @@ export default function Settings() {
   const [balanceSaved, setBalanceSaved] = useState(false);
   const [balanceHasValue, setBalanceHasValue] = useState(false);
 
+  const [budgetInput, setBudgetInput] = useState("");
+  const [budgetSaved, setBudgetSaved] = useState(false);
+  const [budgetHasValue, setBudgetHasValue] = useState(false);
+
   const [incomeCategories, setIncomeCategories] = useState<string[]>([]);
   const [expenseCategories, setExpenseCategories] = useState<string[]>([]);
   const [expenseColorMap, setExpenseColorMap] = useState<Record<string, string>>({});
   const [incomeColorMap, setIncomeColorMap] = useState<Record<string, string>>({});
+
+  const restoreInputRef = useRef<HTMLInputElement>(null);
+  const [restoreMessage, setRestoreMessage] = useState<string | null>(null);
+  const [restoring, setRestoring] = useState(false);
 
   async function reloadCategories() {
     const [income, expense, expenseColors, incomeColors] = await Promise.all([
@@ -53,6 +69,10 @@ export default function Settings() {
       if (await hasInitialBalance()) {
         setBalanceHasValue(true);
         setBalanceInput(String(await getInitialBalance()));
+      }
+      if (await hasMonthlyBudget()) {
+        setBudgetHasValue(true);
+        setBudgetInput(String(await getMonthlyBudget()));
       }
     })();
   }, []);
@@ -82,29 +102,61 @@ export default function Settings() {
     setTimeout(() => setBalanceSaved(false), 2000);
   }
 
+  async function handleSaveBudget(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const amount = parseAmountInput(budgetInput);
+    await setMonthlyBudget(amount);
+    setBudgetHasValue(true);
+    setBudgetSaved(true);
+    setTimeout(() => setBudgetSaved(false), 2000);
+  }
+
+  async function handleRestoreFile(file: File | undefined) {
+    if (!file) return;
+    if (restoreInputRef.current) restoreInputRef.current.value = "";
+    if (
+      !window.confirm(
+        "백업 파일 내용으로 현재 데이터(거래 내역, 카테고리, 초기 자산, 예산)를 덮어씁니다. 계속할까요?"
+      )
+    ) {
+      return;
+    }
+    setRestoring(true);
+    setRestoreMessage(null);
+    try {
+      await importBackup(file);
+      setRestoreMessage("복원이 완료되었습니다. 화면을 새로고침합니다...");
+      setTimeout(() => window.location.reload(), 1200);
+    } catch (err) {
+      setRestoreMessage(err instanceof Error ? err.message : "복원 중 오류가 발생했습니다.");
+    } finally {
+      setRestoring(false);
+    }
+  }
+
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-lg flex-col gap-8 p-6">
+    <div className="mx-auto flex min-h-screen w-full max-w-lg flex-col gap-8 p-6" style={{ background: "var(--color-page-bg)" }}>
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">설정</h1>
+        <h1 className="app-title text-xl font-bold">설정</h1>
         <HomeLink />
       </div>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Claude API 키</h2>
-        <p className="text-xs text-zinc-500 dark:text-zinc-400">
+        <h2 className="app-title text-sm font-semibold">Claude API 키</h2>
+        <p className="app-muted text-xs">
           영수증 사진 인식(Claude Vision)에 사용됩니다. 이 키는 이 기기의 브라우저에만 저장되며, 서버로
           전송되지 않고 Anthropic API에 직접 요청할 때만 사용됩니다.
         </p>
 
         {hasKey ? (
-          <div className="flex items-center justify-between rounded border border-zinc-200 p-3 text-sm dark:border-zinc-800">
-            <span className="text-zinc-600 dark:text-zinc-400">API 키가 설정되어 있습니다.</span>
-            <button type="button" onClick={handleClearKey} className="text-xs text-red-600 underline">
+          <div className="app-card flex items-center justify-between p-3 text-sm">
+            <span className="app-muted">API 키가 설정되어 있습니다.</span>
+            <button type="button" onClick={handleClearKey} className="text-xs underline" style={{ color: "var(--color-red)" }}>
               삭제
             </button>
           </div>
         ) : (
-          <p className="rounded border border-amber-300 bg-amber-50 p-3 text-xs text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
+          <p className="rounded-xl p-3 text-xs" style={{ background: "var(--color-gold-tint)", color: "var(--color-text-strong)" }}>
             아직 API 키가 설정되지 않았습니다.
           </p>
         )}
@@ -116,28 +168,22 @@ export default function Settings() {
             value={keyInput}
             onChange={(e) => setKeyInput(e.target.value)}
             placeholder="sk-ant-..."
-            className="w-full min-w-0 rounded border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+            className="field w-full min-w-0 px-3 py-2 text-sm"
           />
-          <button
-            type="submit"
-            className="w-full rounded bg-black px-4 py-2 text-sm font-medium text-white dark:bg-white dark:text-black"
-          >
+          <button type="submit" className="btn-primary w-full px-4 py-2 text-sm">
             {hasKey ? "키 교체" : "키 저장"}
           </button>
-          {keySaved && <p className="text-sm text-green-600">저장되었습니다.</p>}
+          {keySaved && <p className="text-sm" style={{ color: "var(--color-green)" }}>저장되었습니다.</p>}
         </form>
 
-        <p className="text-xs text-zinc-400">
-          console.anthropic.com에서 키를 발급받고, 사용량 한도(spend limit)를 설정해두는 것을
-          권장합니다.
+        <p className="app-muted text-xs">
+          console.anthropic.com에서 키를 발급받고, 사용량 한도(spend limit)를 설정해두는 것을 권장합니다.
         </p>
       </section>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-sm font-medium text-zinc-700 dark:text-zinc-300">초기 자산</h2>
-        <p className="text-xs text-zinc-500 dark:text-zinc-400">
-          가계부를 처음 시작하는 시점의 잔액입니다. 대시보드의 현재 자산 계산에 사용됩니다.
-        </p>
+        <h2 className="app-title text-sm font-semibold">초기 자산</h2>
+        <p className="app-muted text-xs">가계부를 처음 시작하는 시점의 잔액입니다. 대시보드의 현재 자산 계산에 사용됩니다.</p>
         <form onSubmit={handleSaveBalance} className="flex flex-col gap-2">
           <input
             type="text"
@@ -145,16 +191,63 @@ export default function Settings() {
             value={formatAmountInput(balanceInput)}
             onChange={(e) => setBalanceInput(e.target.value.replace(/[^\d]/g, ""))}
             placeholder="예: 1,000,000"
-            className="w-full min-w-0 rounded border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+            className="field w-full min-w-0 px-3 py-2 text-sm"
           />
-          <button
-            type="submit"
-            className="w-full rounded border border-zinc-300 px-4 py-2 text-sm font-medium dark:border-zinc-700"
-          >
+          <button type="submit" className="btn-outline w-full px-4 py-2 text-sm">
             {balanceHasValue ? "초기 자산 수정" : "초기 자산 저장"}
           </button>
-          {balanceSaved && <p className="text-sm text-green-600">저장되었습니다.</p>}
+          {balanceSaved && <p className="text-sm" style={{ color: "var(--color-green)" }}>저장되었습니다.</p>}
         </form>
+      </section>
+
+      <section className="flex flex-col gap-3">
+        <h2 className="app-title text-sm font-semibold">이번 달 예산</h2>
+        <p className="app-muted text-xs">홈 화면의 예산 사용률(도넛 그래프)에 사용됩니다. 매달 초기화되지 않고 같은 값이 계속 적용됩니다.</p>
+        <form onSubmit={handleSaveBudget} className="flex flex-col gap-2">
+          <input
+            type="text"
+            inputMode="numeric"
+            value={formatAmountInput(budgetInput)}
+            onChange={(e) => setBudgetInput(e.target.value.replace(/[^\d]/g, ""))}
+            placeholder="예: 1,000,000"
+            className="field w-full min-w-0 px-3 py-2 text-sm"
+          />
+          <button type="submit" className="btn-outline w-full px-4 py-2 text-sm">
+            {budgetHasValue ? "예산 수정" : "예산 저장"}
+          </button>
+          {budgetSaved && <p className="text-sm" style={{ color: "var(--color-green)" }}>저장되었습니다.</p>}
+        </form>
+      </section>
+
+      <section className="flex flex-col gap-3">
+        <h2 className="app-title text-sm font-semibold">데이터 백업</h2>
+        <p className="app-muted text-xs">
+          이 앱의 모든 데이터(거래 내역, 카테고리, 초기 자산, 예산)는 서버가 아니라 <strong>이 기기의 브라우저
+          저장소(IndexedDB)</strong>에만 저장됩니다. 다른 기기와 자동으로 동기화되지 않고, 브라우저 데이터를 지우거나
+          기기를 변경/초기화하면 데이터가 사라질 수 있으니 주기적으로 백업하는 것을 권장합니다. (Claude API 키는
+          보안을 위해 백업 파일에 포함되지 않습니다.)
+        </p>
+
+        <button type="button" onClick={() => exportBackup()} className="btn-primary w-full px-4 py-2 text-sm">
+          백업 파일 내보내기
+        </button>
+
+        <input
+          ref={restoreInputRef}
+          type="file"
+          accept="application/json"
+          className="hidden"
+          onChange={(e) => handleRestoreFile(e.target.files?.[0])}
+        />
+        <button
+          type="button"
+          disabled={restoring}
+          onClick={() => restoreInputRef.current?.click()}
+          className="btn-outline w-full px-4 py-2 text-sm"
+        >
+          백업 파일에서 복원
+        </button>
+        {restoreMessage && <p className="text-sm" style={{ color: "var(--color-text)" }}>{restoreMessage}</p>}
       </section>
 
       <CategoryManager

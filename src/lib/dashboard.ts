@@ -90,6 +90,22 @@ export async function getCategoryBreakdown(
     .sort((a, b) => b.amount - a.amount);
 }
 
+export interface MonthNet {
+  income: number;
+  expense: number;
+  net: number;
+}
+
+export async function getCurrentMonthNet(): Promise<MonthNet> {
+  const txs = await getAllForAggregation();
+  const today = todayUTC();
+  const monthPrefix = `${today.getUTCFullYear()}-${String(today.getUTCMonth() + 1).padStart(2, "0")}`;
+  const inMonth = txs.filter((t) => t.date.slice(0, 7) === monthPrefix);
+  const income = inMonth.filter((t) => t.type === "income").reduce((sum, t) => sum + t.amount, 0);
+  const expense = inMonth.filter((t) => t.type === "expense").reduce((sum, t) => sum + t.amount, 0);
+  return { income, expense, net: income - expense };
+}
+
 export interface WeeklyPoint {
   weekStart: string;
   income: number;

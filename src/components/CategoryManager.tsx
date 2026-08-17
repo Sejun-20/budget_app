@@ -108,8 +108,8 @@ export default function CategoryManager({
 
   return (
     <section className="flex flex-col gap-3">
-      <h2 className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{title}</h2>
-      <p className="text-xs text-zinc-500 dark:text-zinc-400">{description}</p>
+      <h2 className="app-title text-sm font-semibold">{title}</h2>
+      <p className="app-muted text-xs">{description}</p>
 
       <ul className="flex flex-col gap-1.5">
         {categories.map((c) =>
@@ -124,31 +124,20 @@ export default function CategoryManager({
                   if (e.key === "Escape") setEditing(null);
                 }}
                 autoFocus
-                className="w-full min-w-0 rounded border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+                className="field w-full min-w-0 px-3 py-2 text-sm"
               />
-              <button
-                type="button"
-                onClick={() => commitEdit(c)}
-                className="shrink-0 rounded bg-black px-3 py-2 text-xs font-medium text-white dark:bg-white dark:text-black"
-              >
+              <button type="button" onClick={() => commitEdit(c)} className="btn-primary shrink-0 px-3 py-2 text-xs">
                 저장
               </button>
-              <button
-                type="button"
-                onClick={() => setEditing(null)}
-                className="shrink-0 rounded border border-zinc-300 px-3 py-2 text-xs dark:border-zinc-700"
-              >
+              <button type="button" onClick={() => setEditing(null)} className="btn-outline shrink-0 px-3 py-2 text-xs">
                 취소
               </button>
             </li>
           ) : (
-            <li
-              key={c}
-              className="flex items-center justify-between gap-2 rounded border border-zinc-200 px-3 py-2 text-sm dark:border-zinc-800"
-            >
+            <li key={c} className="app-card flex items-center justify-between gap-2 px-3 py-2 text-sm">
               <span className="flex min-w-0 items-center gap-2">
                 <label
-                  className="relative inline-block h-3.5 w-3.5 shrink-0 cursor-pointer rounded-full ring-1 ring-black/10 dark:ring-white/20"
+                  className="relative inline-block h-3.5 w-3.5 shrink-0 cursor-pointer rounded-full ring-1 ring-black/10"
                   style={{ backgroundColor: colorFor(c) }}
                   title="색상 변경"
                 >
@@ -167,7 +156,8 @@ export default function CategoryManager({
                   type="button"
                   disabled={busy}
                   onClick={() => startEdit(c)}
-                  className="text-xs text-zinc-500 underline dark:text-zinc-400"
+                  className="text-xs underline"
+                  style={{ color: "var(--color-primary)" }}
                 >
                   수정
                 </button>
@@ -175,7 +165,8 @@ export default function CategoryManager({
                   type="button"
                   disabled={busy}
                   onClick={() => handleDelete(c)}
-                  className="text-xs text-red-600 underline"
+                  className="text-xs underline"
+                  style={{ color: "var(--color-red)" }}
                 >
                   삭제
                 </button>
@@ -192,14 +183,9 @@ export default function CategoryManager({
           onChange={(e) => setNewName(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleAdd()}
           placeholder="새 카테고리 이름"
-          className="w-full min-w-0 rounded border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+          className="field w-full min-w-0 px-3 py-2 text-sm"
         />
-        <button
-          type="button"
-          disabled={busy || !newName.trim()}
-          onClick={handleAdd}
-          className="shrink-0 rounded border border-zinc-300 px-4 py-2 text-sm font-medium disabled:opacity-50 dark:border-zinc-700"
-        >
+        <button type="button" disabled={busy || !newName.trim()} onClick={handleAdd} className="btn-outline shrink-0 px-4 py-2 text-sm">
           추가
         </button>
       </div>

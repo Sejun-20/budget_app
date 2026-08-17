@@ -26,23 +26,21 @@ export default function TransactionsList() {
   }
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-2xl flex-col gap-4 p-6">
+    <div className="mx-auto flex min-h-screen max-w-2xl flex-col gap-4 p-6" style={{ background: "var(--color-page-bg)" }}>
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">전체 내역</h1>
+        <h1 className="app-title text-xl font-bold">전체 내역</h1>
         <HomeLink />
       </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm" style={{ color: "var(--color-red)" }}>{error}</p>}
 
-      {transactions === null && <p className="text-sm text-zinc-500 dark:text-zinc-400">불러오는 중...</p>}
-      {transactions !== null && transactions.length === 0 && (
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">아직 내역이 없습니다.</p>
-      )}
+      {transactions === null && <p className="app-muted text-sm">불러오는 중...</p>}
+      {transactions !== null && transactions.length === 0 && <p className="app-muted text-sm">아직 내역이 없습니다.</p>}
 
       <ul className="flex flex-col gap-2">
         {transactions?.map((t) =>
           editingId === t.id ? (
-            <li key={t.id} className="rounded border border-zinc-300 p-4 dark:border-zinc-700">
+            <li key={t.id} className="app-card p-4">
               <TransactionEditForm
                 transaction={t}
                 onCancel={() => setEditingId(null)}
@@ -53,12 +51,9 @@ export default function TransactionsList() {
               />
             </li>
           ) : (
-            <li
-              key={t.id}
-              className="flex items-center justify-between gap-3 rounded border border-zinc-200 p-3 dark:border-zinc-800"
-            >
+            <li key={t.id} className="app-card flex items-center justify-between gap-3 p-3">
               <div className="flex min-w-0 flex-col">
-                <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                <span className="app-muted text-xs">
                   {t.date} · {t.category}
                   {t.source === "receipt" && " · 영수증"}
                 </span>
@@ -66,17 +61,16 @@ export default function TransactionsList() {
               </div>
               <div className="flex shrink-0 items-center gap-3">
                 <span
-                  className={`text-sm font-medium tabular-nums ${
-                    t.type === "income" ? "text-blue-600 dark:text-blue-400" : "text-orange-600 dark:text-orange-400"
-                  }`}
+                  className="text-sm font-medium tabular-nums"
+                  style={{ color: t.type === "income" ? "var(--color-green)" : "var(--color-red)" }}
                 >
                   {t.type === "income" ? "+" : "-"}
                   {formatWon(t.amount)}
                 </span>
-                <button onClick={() => setEditingId(t.id)} className="text-xs text-zinc-500 underline dark:text-zinc-400">
+                <button onClick={() => setEditingId(t.id)} className="app-muted text-xs underline">
                   수정
                 </button>
-                <button onClick={() => handleDelete(t.id)} className="text-xs text-red-600 underline">
+                <button onClick={() => handleDelete(t.id)} className="text-xs underline" style={{ color: "var(--color-red)" }}>
                   삭제
                 </button>
               </div>
