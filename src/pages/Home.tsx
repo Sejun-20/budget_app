@@ -35,12 +35,25 @@ function MoneyIcon({ sign, badgeColor }: { sign: "+" | "-"; badgeColor: string }
   );
 }
 
-function ListIcon() {
+function CalendarIcon() {
   return (
     <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#fff" strokeWidth="1.8">
-      <rect x="4" y="3" width="14" height="16" rx="1.5" />
-      <line x1="7" y1="7.5" x2="15" y2="7.5" />
-      <line x1="7" y1="11.5" x2="13" y2="11.5" />
+      <rect x="3" y="4.5" width="16" height="14" rx="2" />
+      <line x1="3" y1="8.5" x2="19" y2="8.5" />
+      <line x1="7" y1="2.5" x2="7" y2="6.5" strokeLinecap="round" />
+      <line x1="15" y1="2.5" x2="15" y2="6.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+/** The app's identity mark — an open ledger book, matching the icon used
+ * for the PWA/home-screen icon (see public/icon-*.png, generated from the
+ * same glyph). */
+function LogoIcon() {
+  return (
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 6c-1.8-1.3-4-2-6-2v14c2 0 4.2.7 6 2 1.8-1.3 4-2 6-2V4c-2 0-4.2.7-6 2z" />
+      <path d="M12 6v14" />
     </svg>
   );
 }
@@ -63,7 +76,7 @@ const TILES = [
     badge: "var(--color-red)",
     icon: <MoneyIcon sign="-" badgeColor="var(--color-red-dark)" />,
   },
-  { to: "/transactions", label: "전체 내역", tint: "var(--color-primary-tint)", badge: "var(--color-primary)", icon: <ListIcon /> },
+  { to: "/transactions", label: "전체 내역", tint: "var(--color-primary-tint)", badge: "var(--color-primary)", icon: <CalendarIcon /> },
   {
     to: "/transactions/new?type=income",
     label: "수입 추가",
@@ -85,14 +98,14 @@ export default function Home() {
 
   return (
     <div className="flex min-h-screen flex-col" style={{ background: "var(--color-page-bg)" }}>
-      <header
-        className="flex flex-col gap-4 rounded-b-[32px] px-5 pb-[22px] pt-6"
-        style={{ background: "var(--color-primary)" }}
-      >
-        <h1 className="text-2xl leading-none font-bold text-white">가계부</h1>
-        <div className="flex flex-col gap-1">
-          <span className="text-xs text-white/75">현재 자산</span>
+      <header className="flex items-center rounded-b-[32px] px-5 py-8" style={{ background: "var(--color-primary)" }}>
+        <div className="flex flex-1 flex-col items-center gap-1 text-center">
+          <h1 className="text-2xl leading-none font-bold text-white">가계부</h1>
+          <span className="mt-1 text-xs text-white/75">현재 자산</span>
           <span className="text-[22px] font-bold text-white">{formatWon(balance)}</span>
+        </div>
+        <div className="flex flex-1 items-center justify-center">
+          <LogoIcon />
         </div>
       </header>
 
@@ -110,7 +123,7 @@ export default function Home() {
         </div>
       )}
 
-      <div className="flex flex-1 flex-col justify-center p-5">
+      <div className="flex flex-col p-5">
         <div className="grid grid-cols-2 gap-3">
           {TILES.map((t) => (
             <Link

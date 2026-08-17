@@ -58,12 +58,18 @@ body {
 }
 
 /* iOS Safari auto-zooms the page on focus of any form control whose
-   font-size is below 16px. Force 16px on every control so focusing an
-   input never triggers the zoom. */
+   font-size is below 16px when a keyboard appears. `select` opens a native
+   picker wheel instead of a keyboard, so it's exempt and free to be sized
+   like any other UI text. */
 input,
-select,
 textarea {
   font-size: 16px;
+}
+
+/* Native `select` chrome sometimes ignores the page's inherited font,
+   rendering in the OS's default UI font instead of the app's. */
+select {
+  font-family: inherit;
 }
 
 /* iOS Safari's native date control has an intrinsic content width that

@@ -143,14 +143,20 @@ export default function Dashboard() {
             </button>
           </form>
         ) : (
-          <div>
-            <p className="app-muted text-sm">현재 자산</p>
-            <p className="app-title text-3xl font-bold tabular-nums">{summary ? formatWon(summary.balance) : "..."}</p>
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="app-muted text-sm">현재 자산</p>
+              <p className="app-title text-3xl font-bold tabular-nums">{summary ? formatWon(summary.balance) : "..."}</p>
+            </div>
             {summary && monthNet && (
-              <p className="app-muted mt-1 text-xs">
-                이월 {formatWon(summary.balance - monthNet.income + monthNet.expense)} + 이번 달 수입{" "}
-                {formatWon(monthNet.income)} − 이번 달 지출 {formatWon(monthNet.expense)}
-              </p>
+              <div className="app-muted grid shrink-0 grid-cols-[auto_auto] gap-x-1.5 gap-y-0.5 pt-1 text-xs">
+                <span>이월 :</span>
+                <span className="text-right tabular-nums">{formatWon(summary.balance - monthNet.income + monthNet.expense)}</span>
+                <span>수입 :</span>
+                <span className="text-right tabular-nums">{formatWon(monthNet.income)}</span>
+                <span>지출 :</span>
+                <span className="text-right tabular-nums">{formatWon(monthNet.expense)}</span>
+              </div>
             )}
           </div>
         )}

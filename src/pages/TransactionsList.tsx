@@ -5,9 +5,9 @@ import TransactionEditForm from "@/components/TransactionEditForm";
 import { formatWon } from "@/lib/money";
 import { deleteTransaction, listTransactions, type Transaction } from "@/lib/transactions";
 
-type Mode = "list" | "calendar" | "summary";
+type Mode = "list" | "calendar";
 
-const MODE_LABEL: Record<Mode, string> = { list: "기본", calendar: "달력", summary: "요약" };
+const MODE_LABEL: Record<Mode, string> = { list: "기본", calendar: "달력" };
 
 function currentYearMonth(): { year: number; month: number } {
   const now = new Date();
@@ -57,7 +57,7 @@ export default function TransactionsList() {
       <PageHeader title="전체 내역" />
 
       <div className="field flex gap-1 p-0.5">
-        {(["list", "calendar", "summary"] as Mode[]).map((m) => (
+        {(["list", "calendar"] as Mode[]).map((m) => (
           <button
             key={m}
             type="button"
@@ -70,7 +70,7 @@ export default function TransactionsList() {
         ))}
       </div>
 
-      {(mode === "calendar" || mode === "summary") && (
+      {mode === "calendar" && (
         <div className="flex items-center justify-between">
           <button type="button" onClick={() => shiftMonth(-1)} className="app-title px-3 py-1 text-lg" aria-label="이전 달">
             ‹
@@ -93,33 +93,27 @@ export default function TransactionsList() {
       )}
 
       {transactions !== null && mode === "calendar" && (
-        <TransactionCalendar year={ym.year} month={ym.month} transactions={monthTransactions} />
-      )}
-
-      {transactions !== null && mode === "summary" && (
-        <div className="app-card flex flex-col gap-3 p-5">
-          {monthTransactions.length === 0 ? (
-            <p className="app-muted py-4 text-center text-sm">해당 월에 내역이 없습니다.</p>
-          ) : (
-            <div className="flex flex-col gap-2 text-sm">
-              <div className="flex justify-between">
-                <span className="app-muted">수입 합계</span>
-                <span className="font-medium tabular-nums" style={{ color: "var(--color-blue)" }}>
-                  {formatWon(monthIncome)}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="app-muted">지출 합계</span>
-                <span className="font-medium tabular-nums" style={{ color: "var(--color-red)" }}>
-                  {formatWon(monthExpense)}
-                </span>
-              </div>
-              <div className="flex justify-between pt-2" style={{ borderTop: "1px solid var(--color-border)" }}>
-                <span className="app-muted">순잔액</span>
-                <span className="app-title font-semibold tabular-nums">{formatWon(monthIncome - monthExpense)}</span>
-              </div>
+        <div className="flex flex-col gap-4">
+          <div className="app-card flex flex-col gap-2 p-4 text-sm">
+            <div className="flex justify-between">
+              <span className="app-muted">수입 합계</span>
+              <span className="font-medium tabular-nums" style={{ color: "var(--color-blue)" }}>
+                {formatWon(monthIncome)}
+              </span>
             </div>
-          )}
+            <div className="flex justify-between">
+              <span className="app-muted">지출 합계</span>
+              <span className="font-medium tabular-nums" style={{ color: "var(--color-red)" }}>
+                {formatWon(monthExpense)}
+              </span>
+            </div>
+            <div className="flex justify-between pt-2" style={{ borderTop: "1px solid var(--color-border)" }}>
+              <span className="app-muted">순잔액</span>
+              <span className="app-title font-semibold tabular-nums">{formatWon(monthIncome - monthExpense)}</span>
+            </div>
+          </div>
+
+          <TransactionCalendar year={ym.year} month={ym.month} transactions={monthTransactions} />
         </div>
       )}
 

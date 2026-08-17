@@ -1,9 +1,13 @@
+import type { CSSProperties } from "react";
 import { weeksInMonth, type CustomPeriod } from "@/lib/period";
 
 const CURRENT_YEAR = new Date().getFullYear();
 const YEAR_OPTIONS = Array.from({ length: 11 }, (_, i) => CURRENT_YEAR - i);
 const MONTH_OPTIONS = Array.from({ length: 12 }, (_, i) => i + 1);
-const SELECT_CLASS = "field min-w-0 flex-1 px-1 py-0.5 text-[10px]";
+const SELECT_CLASS = "field min-w-0 flex-1 px-1 py-1.5 text-center text-xs font-medium";
+// `select` doesn't trigger iOS's zoom-on-focus (that's a text-keyboard-only
+// quirk), so it's safe to match the surrounding pill buttons' size here.
+const SELECT_STYLE: CSSProperties = { fontFamily: "inherit", textAlignLast: "center" };
 
 function formatWeekLabel(weekStart: string): string {
   const [y, m, d] = weekStart.split("-").map(Number);
@@ -25,7 +29,12 @@ export default function CustomPeriodPicker({
 }) {
   return (
     <div className="field flex flex-nowrap items-center gap-1 p-1.5">
-      <select value={value.year} onChange={(e) => onChange({ year: Number(e.target.value) })} className={SELECT_CLASS}>
+      <select
+        value={value.year}
+        onChange={(e) => onChange({ year: Number(e.target.value) })}
+        className={SELECT_CLASS}
+        style={SELECT_STYLE}
+      >
         {YEAR_OPTIONS.map((y) => (
           <option key={y} value={y}>
             {y}년
@@ -37,6 +46,7 @@ export default function CustomPeriodPicker({
         value={value.month ?? ""}
         onChange={(e) => onChange({ year: value.year, month: e.target.value ? Number(e.target.value) : undefined })}
         className={SELECT_CLASS}
+        style={SELECT_STYLE}
       >
         <option value="">전체</option>
         {MONTH_OPTIONS.map((m) => (
@@ -51,6 +61,7 @@ export default function CustomPeriodPicker({
           value={value.week ?? ""}
           onChange={(e) => onChange({ year: value.year, month: value.month, week: e.target.value || undefined })}
           className={SELECT_CLASS}
+          style={SELECT_STYLE}
         >
           <option value="">전체</option>
           {weeksInMonth(value.year, value.month).map((w) => (
