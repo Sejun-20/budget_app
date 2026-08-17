@@ -109,15 +109,15 @@ export default function Home() {
 
   return (
     <div className="flex min-h-screen flex-col" style={{ background: "var(--color-page-bg)" }}>
-      <header className="mx-4 mt-4 flex items-center rounded-t-[32px] px-5 py-8" style={{ background: "var(--color-primary)" }}>
+      <header className="mx-4 mt-4 flex rounded-t-[32px] px-5 py-8" style={{ background: "var(--color-primary)" }}>
         <div className="flex flex-1 flex-col items-start gap-1 text-left">
           <h1 className="text-2xl leading-none font-bold text-white">가계부</h1>
-          <span className="mt-1 text-xs text-white/75">현재 자산</span>
+          <span className="mt-2 text-xs text-white/75">현재 자산</span>
           <span className="text-[22px] font-bold text-white">{formatWon(balance)}</span>
         </div>
-        <div className="flex flex-1 flex-col items-center justify-center gap-1 text-center">
-          <span className="text-sm text-white/80">{formatDateLine(now)}</span>
-          <span className="text-2xl font-bold text-white">{formatTimeLine(now)}</span>
+        <div className="flex flex-1 flex-col items-center justify-between text-center">
+          <span className="text-2xl leading-none font-bold text-white">{formatDateLine(now)}</span>
+          <span className="text-[22px] font-bold text-white">{formatTimeLine(now)}</span>
         </div>
       </header>
 
