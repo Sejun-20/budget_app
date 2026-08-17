@@ -21,12 +21,13 @@ export interface ReceiptDraft {
   amount: number;
   category: string;
   memo: string;
+  paymentMethod: "cash" | "card";
 }
 
 function buildExtractTool(categoryNames: string[]): Anthropic.Tool {
   return {
     name: "extract_receipt",
-    description: "영수증 사진에서 상호명, 날짜, 총액, 카테고리, 메모를 추출합니다.",
+    description: "영수증 사진에서 상호명, 날짜, 총액, 카테고리, 결제수단, 메모를 추출합니다.",
     input_schema: {
       type: "object",
       properties: {
@@ -47,12 +48,18 @@ function buildExtractTool(categoryNames: string[]): Anthropic.Tool {
           enum: categoryNames,
           description: "다음 중 가장 적절한 지출 카테고리 하나: " + categoryNames.join(", "),
         },
+        paymentMethod: {
+          type: "string",
+          enum: ["cash", "card"],
+          description:
+            "결제수단. 영수증에 '카드', '승인번호', 카드사명 등 카드결제 흔적이 있으면 card, '현금(영수증)', '현금결제'처럼 현금 결제임이 명시되어 있으면 cash. 판단이 애매하면 card로 추정.",
+        },
         memo: {
           type: "string",
           description: "구매 품목 등 참고할 메모. 없으면 빈 문자열.",
         },
       },
-      required: ["merchant", "date", "amount", "category", "memo"],
+      required: ["merchant", "date", "amount", "category", "paymentMethod", "memo"],
     },
   };
 }
@@ -69,6 +76,7 @@ function isValidDraft(input: unknown, categoryNames: string[]): input is Receipt
     d.amount > 0 &&
     typeof d.category === "string" &&
     categoryNames.includes(d.category) &&
+    (d.paymentMethod === "cash" || d.paymentMethod === "card") &&
     typeof d.memo === "string"
   );
 }

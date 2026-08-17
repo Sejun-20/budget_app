@@ -8,6 +8,7 @@ export interface NewTransaction {
   merchant?: string | null;
   memo?: string | null;
   source: "receipt" | "manual";
+  paymentMethod: "cash" | "card";
 }
 
 export type Transaction = TransactionRecord;
@@ -42,6 +43,7 @@ export async function insertTransaction(input: NewTransaction): Promise<number> 
     merchant: input.merchant ?? null,
     memo: input.memo ?? null,
     source: input.source,
+    paymentMethod: input.paymentMethod,
     created_at: now,
     updated_at: now,
   };
@@ -74,6 +76,7 @@ export async function updateTransaction(id: number, input: NewTransaction): Prom
     merchant: input.merchant ?? null,
     memo: input.memo ?? null,
     source: input.source,
+    paymentMethod: input.paymentMethod,
     updated_at: new Date().toISOString(),
   };
   await db.put("transactions", record);

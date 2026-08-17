@@ -9,6 +9,8 @@ export interface TransactionRecord {
   merchant: string | null;
   memo: string | null;
   source: "receipt" | "manual";
+  /** Absent on transactions saved before this field existed. */
+  paymentMethod?: "cash" | "card";
   created_at: string;
   updated_at: string;
 }

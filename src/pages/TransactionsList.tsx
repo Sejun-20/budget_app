@@ -51,6 +51,12 @@ export default function TransactionsList() {
   );
   const monthIncome = monthTransactions.filter((t) => t.type === "income").reduce((sum, t) => sum + t.amount, 0);
   const monthExpense = monthTransactions.filter((t) => t.type === "expense").reduce((sum, t) => sum + t.amount, 0);
+  const monthCash = monthTransactions
+    .filter((t) => t.type === "expense" && t.paymentMethod === "cash")
+    .reduce((sum, t) => sum + t.amount, 0);
+  const monthCard = monthTransactions
+    .filter((t) => t.type === "expense" && t.paymentMethod === "card")
+    .reduce((sum, t) => sum + t.amount, 0);
 
   return (
     <div className="mx-auto flex min-h-screen max-w-2xl flex-col gap-4 p-6" style={{ background: "var(--color-page-bg)" }}>
@@ -114,6 +120,25 @@ export default function TransactionsList() {
           </div>
 
           <TransactionCalendar year={ym.year} month={ym.month} transactions={monthTransactions} />
+
+          <div className="app-card flex flex-col gap-2 p-4 text-sm">
+            <div className="flex justify-between">
+              <span className="app-muted">현금 합계</span>
+              <span className="font-medium tabular-nums" style={{ color: "var(--color-gold)" }}>
+                {formatWon(monthCash)}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="app-muted">카드 합계</span>
+              <span className="font-medium tabular-nums" style={{ color: "var(--color-primary)" }}>
+                {formatWon(monthCard)}
+              </span>
+            </div>
+            <div className="flex justify-between pt-2" style={{ borderTop: "1px solid var(--color-border)" }}>
+              <span className="app-muted">지출 합계</span>
+              <span className="app-title font-semibold tabular-nums">{formatWon(monthCash + monthCard)}</span>
+            </div>
+          </div>
         </div>
       )}
 

@@ -16,6 +16,7 @@ interface Draft {
   amount: number;
   category: string;
   memo: string;
+  paymentMethod: "cash" | "card";
 }
 
 interface Failure {
@@ -111,6 +112,7 @@ export default function ReceiptUpload() {
         date: current.date,
         merchant: current.merchant || null,
         memo: current.memo || null,
+        paymentMethod: current.paymentMethod,
       });
       setSavedCount((c) => c + 1);
       advanceQueue();
@@ -234,6 +236,27 @@ export default function ReceiptUpload() {
                 </option>
               ))}
             </select>
+          </label>
+
+          <label className="flex flex-col gap-1 text-sm">
+            결제수단
+            <div className="field flex p-1">
+              {(["cash", "card"] as const).map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => updateCurrentDraft({ paymentMethod: m })}
+                  className="flex-1 rounded px-3 py-2 text-sm font-medium"
+                  style={
+                    queue[0].paymentMethod === m
+                      ? { background: "var(--color-primary)", color: "#fff" }
+                      : { color: "var(--color-text-muted)" }
+                  }
+                >
+                  {m === "cash" ? "현금" : "카드"}
+                </button>
+              ))}
+            </div>
           </label>
 
           <label className="flex flex-col gap-1 text-sm">

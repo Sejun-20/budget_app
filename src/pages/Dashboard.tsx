@@ -6,6 +6,7 @@ import {
   getBalanceSummary,
   getCategoryBreakdown,
   getCurrentMonthNet,
+  getPaymentMethodBreakdown,
   getWeeklySummary,
   getMonthlySummary,
   type BalanceSummary,
@@ -30,10 +31,13 @@ function formatMonthLabel(month: string): string {
   return `${y.slice(2)}.${m}`;
 }
 
+const PAYMENT_COLOR_MAP: Record<string, string> = { 현금: "var(--color-gold)", 카드: "var(--color-primary)" };
+
 export default function Dashboard() {
   const [summary, setSummary] = useState<BalanceSummary | null>(null);
   const [monthNet, setMonthNet] = useState<MonthNet | null>(null);
   const [expenseBreakdown, setExpenseBreakdown] = useState<CategoryAmount[] | null>(null);
+  const [paymentBreakdown, setPaymentBreakdown] = useState<CategoryAmount[] | null>(null);
   const [incomeBreakdown, setIncomeBreakdown] = useState<CategoryAmount[] | null>(null);
   const [weekly, setWeekly] = useState<WeeklyPoint[] | null>(null);
   const [monthly, setMonthly] = useState<MonthlyPoint[] | null>(null);
@@ -41,6 +45,10 @@ export default function Dashboard() {
   const [incomeColorMap, setIncomeColorMap] = useState<Record<string, string>>({});
 
   const [expenseBreakdownSelection, setExpenseBreakdownSelection] = useState<PeriodSelection | null>({
+    kind: "quick",
+    value: "month",
+  });
+  const [paymentBreakdownSelection, setPaymentBreakdownSelection] = useState<PeriodSelection | null>({
     kind: "quick",
     value: "month",
   });
@@ -75,6 +83,10 @@ export default function Dashboard() {
       setExpenseBreakdown
     );
   }, [expenseBreakdownSelection]);
+
+  useEffect(() => {
+    getPaymentMethodBreakdown(paymentBreakdownSelection ?? { kind: "quick", value: "month" }).then(setPaymentBreakdown);
+  }, [paymentBreakdownSelection]);
 
   useEffect(() => {
     getCategoryBreakdown(incomeBreakdownSelection ?? { kind: "quick", value: "month" }, "income").then(
@@ -176,6 +188,27 @@ export default function Dashboard() {
           <p className="app-muted py-8 text-center text-sm">불러오는 중...</p>
         ) : (
           <CategoryPieChart data={expenseBreakdown} colorMap={expenseColorMap} />
+        )}
+      </section>
+
+      {/* 현금/카드 비율 */}
+      <section className="app-card p-5">
+        <div className="mb-4 flex flex-col gap-3">
+          <h2 className="app-title text-sm font-semibold">현금/카드 비율</h2>
+          <PeriodFilter
+            quickOptions={["week", "month", "all"]}
+            selection={paymentBreakdownSelection}
+            onChange={setPaymentBreakdownSelection}
+          />
+        </div>
+        {paymentBreakdown === null ? (
+          <p className="app-muted py-8 text-center text-sm">불러오는 중...</p>
+        ) : (
+          <CategoryPieChart
+            data={paymentBreakdown}
+            colorMap={PAYMENT_COLOR_MAP}
+            emptyMessage="해당 기간에 결제수단 정보가 있는 지출 내역이 없습니다."
+          />
         )}
       </section>
 

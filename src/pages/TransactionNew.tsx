@@ -24,6 +24,7 @@ export default function TransactionNew() {
   const [category, setCategory] = useState<string>("");
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState(todayString());
+  const [paymentMethod, setPaymentMethod] = useState<"cash" | "card">("card");
   const [memo, setMemo] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -75,6 +76,7 @@ export default function TransactionNew() {
         amount: amountNum,
         date,
         memo: memo || null,
+        paymentMethod,
       });
       setSuccessMsg(`${type === "income" ? "수입" : "지출"} ${formatWon(amountNum)}이 저장되었습니다.`);
       setAmount("");
@@ -154,6 +156,25 @@ export default function TransactionNew() {
             className="field px-3 py-2"
             required
           />
+        </label>
+
+        <label className="flex w-full min-w-0 flex-col gap-1 text-sm">
+          결제수단
+          <div className="field flex w-full p-1">
+            {(["cash", "card"] as const).map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => setPaymentMethod(m)}
+                className="flex-1 rounded px-3 py-2 text-sm font-medium"
+                style={
+                  paymentMethod === m ? { background: "var(--color-primary)", color: "#fff" } : { color: "var(--color-text-muted)" }
+                }
+              >
+                {m === "cash" ? "현금" : "카드"}
+              </button>
+            ))}
+          </div>
         </label>
 
         <label className="flex w-full min-w-0 flex-col gap-1 text-sm">

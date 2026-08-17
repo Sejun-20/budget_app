@@ -20,6 +20,7 @@ export default function TransactionEditForm({
   const [category, setCategory] = useState<string>(transaction.category);
   const [amount, setAmount] = useState(String(transaction.amount));
   const [date, setDate] = useState(transaction.date);
+  const [paymentMethod, setPaymentMethod] = useState<"cash" | "card">(transaction.paymentMethod ?? "card");
   const [merchant, setMerchant] = useState(transaction.merchant ?? "");
   const [memo, setMemo] = useState(transaction.memo ?? "");
   const [error, setError] = useState<string | null>(null);
@@ -63,6 +64,7 @@ export default function TransactionEditForm({
         date,
         merchant: merchant || null,
         memo: memo || null,
+        paymentMethod,
       });
       if (!ok) {
         setError("저장 중 오류가 발생했습니다.");
@@ -76,6 +78,7 @@ export default function TransactionEditForm({
         date,
         merchant: merchant || null,
         memo: memo || null,
+        paymentMethod,
       });
     } finally {
       setSaving(false);
@@ -130,6 +133,20 @@ export default function TransactionEditForm({
       />
 
       <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="field px-3 py-2 text-sm" required />
+
+      <div className="field flex p-1">
+        {(["cash", "card"] as const).map((m) => (
+          <button
+            key={m}
+            type="button"
+            onClick={() => setPaymentMethod(m)}
+            className="flex-1 rounded px-3 py-1.5 text-sm font-medium"
+            style={paymentMethod === m ? { background: "var(--color-primary)", color: "#fff" } : { color: "var(--color-text-muted)" }}
+          >
+            {m === "cash" ? "현금" : "카드"}
+          </button>
+        ))}
+      </div>
 
       <input
         type="text"

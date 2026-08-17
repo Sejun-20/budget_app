@@ -18,12 +18,34 @@ interface RawTransaction {
   category: string;
   amount: number;
   date: string;
+  paymentMethod?: "cash" | "card";
 }
 
 async function getAllForAggregation(): Promise<RawTransaction[]> {
   const db = await getDb();
   const all = await db.getAll("transactions");
-  return all.map((t) => ({ type: t.type, category: t.category, amount: t.amount, date: t.date }));
+  return all.map((t) => ({
+    type: t.type,
+    category: t.category,
+    amount: t.amount,
+    date: t.date,
+    paymentMethod: t.paymentMethod,
+  }));
+}
+
+function filterByPeriod<T extends { date: string }>(items: T[], selection: PeriodSelection): T[] {
+  if (selection.kind === "quick") {
+    if (selection.value === "all") return items;
+    const today = todayUTC();
+    const start =
+      selection.value === "week"
+        ? mondayOfWeekUTC(today)
+        : new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 1));
+    const startStr = formatDateUTC(start);
+    return items.filter((t) => t.date >= startStr);
+  }
+  const { start, end } = resolveCustomRange(selection.value);
+  return items.filter((t) => t.date >= start && t.date <= end);
 }
 
 export interface BalanceSummary {
@@ -63,22 +85,7 @@ export async function getCategoryBreakdown(
   type: "income" | "expense" = "expense"
 ): Promise<CategoryAmount[]> {
   const matching = (await getAllForAggregation()).filter((t) => t.type === type);
-
-  let filtered = matching;
-  if (selection.kind === "quick") {
-    if (selection.value !== "all") {
-      const today = todayUTC();
-      const start =
-        selection.value === "week"
-          ? mondayOfWeekUTC(today)
-          : new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 1));
-      const startStr = formatDateUTC(start);
-      filtered = matching.filter((t) => t.date >= startStr);
-    }
-  } else {
-    const { start, end } = resolveCustomRange(selection.value);
-    filtered = matching.filter((t) => t.date >= start && t.date <= end);
-  }
+  const filtered = filterByPeriod(matching, selection);
 
   const totals = new Map<string, number>();
   for (const t of filtered) {
@@ -87,6 +94,27 @@ export async function getCategoryBreakdown(
 
   return [...totals.entries()]
     .map(([category, amount]) => ({ category, amount }))
+    .sort((a, b) => b.amount - a.amount);
+}
+
+const PAYMENT_METHOD_LABEL = { cash: "현금", card: "카드" } as const;
+
+/** Expense-only — cash vs card doesn't apply to income the same way. Older
+ * transactions saved before this field existed are excluded rather than
+ * mis-attributed to either bucket. */
+export async function getPaymentMethodBreakdown(selection: PeriodSelection): Promise<CategoryAmount[]> {
+  const matching = (await getAllForAggregation()).filter(
+    (t): t is RawTransaction & { paymentMethod: "cash" | "card" } => t.type === "expense" && t.paymentMethod != null
+  );
+  const filtered = filterByPeriod(matching, selection);
+
+  const totals = new Map<"cash" | "card", number>();
+  for (const t of filtered) {
+    totals.set(t.paymentMethod, (totals.get(t.paymentMethod) ?? 0) + t.amount);
+  }
+
+  return [...totals.entries()]
+    .map(([method, amount]) => ({ category: PAYMENT_METHOD_LABEL[method], amount }))
     .sort((a, b) => b.amount - a.amount);
 }
 
