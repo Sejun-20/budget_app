@@ -23,3 +23,12 @@ export async function getInitialBalance(): Promise<number> {
 export async function setInitialBalance(amount: number): Promise<void> {
   await setSetting("initial_balance", String(Math.round(amount)));
 }
+
+export async function getDefaultPaymentMethod(): Promise<"cash" | "card"> {
+  const value = await getSetting("default_payment_method");
+  return value === "card" ? "card" : "cash";
+}
+
+export async function setDefaultPaymentMethod(method: "cash" | "card"): Promise<void> {
+  await setSetting("default_payment_method", method);
+}

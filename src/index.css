@@ -16,6 +16,7 @@
   --color-gold: oklch(0.75 0.15 85); /* badge */
   --color-gold-ring: oklch(0.8 0.14 85); /* progress ring */
   --color-gold-tint: oklch(0.8 0.14 85 / 0.18);
+  --color-gold-bright: oklch(0.85 0.16 95); /* brighter yellow, for the 현금/카드 pie chart */
 
   --color-red: oklch(0.62 0.13 25); /* terracotta */
   --color-red-dark: oklch(0.42 0.1 25);

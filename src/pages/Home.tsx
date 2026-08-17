@@ -5,6 +5,26 @@ import { getBalanceSummary } from "@/lib/dashboard";
 import { formatWon } from "@/lib/money";
 
 const ICON_SIZE = 26;
+const WEEKDAY_KO = ["일", "월", "화", "수", "목", "금", "토"];
+
+function useClock(): Date {
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 15_000);
+    return () => clearInterval(id);
+  }, []);
+  return now;
+}
+
+function formatDateLine(d: Date): string {
+  return `${d.getMonth() + 1}월 ${d.getDate()}일 (${WEEKDAY_KO[d.getDay()]})`;
+}
+
+function formatTimeLine(d: Date): string {
+  const h = String(d.getHours()).padStart(2, "0");
+  const m = String(d.getMinutes()).padStart(2, "0");
+  return `${h}:${m}`;
+}
 
 function ReceiptIcon() {
   return (
@@ -80,6 +100,7 @@ const TILES = [
 export default function Home() {
   const [keySet, setKeySet] = useState(true);
   const [balance, setBalance] = useState(0);
+  const now = useClock();
 
   useEffect(() => {
     setKeySet(hasApiKey());
@@ -94,8 +115,9 @@ export default function Home() {
           <span className="mt-1 text-xs text-white/75">현재 자산</span>
           <span className="text-[22px] font-bold text-white">{formatWon(balance)}</span>
         </div>
-        <div className="flex flex-1 items-center justify-center">
-          <img src={`${import.meta.env.BASE_URL}icon-192.png`} alt="가계부" className="h-14 w-14" />
+        <div className="flex flex-1 flex-col items-center justify-center gap-1 text-center">
+          <span className="text-sm text-white/80">{formatDateLine(now)}</span>
+          <span className="text-2xl font-bold text-white">{formatTimeLine(now)}</span>
         </div>
       </header>
 

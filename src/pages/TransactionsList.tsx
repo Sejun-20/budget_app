@@ -161,6 +161,7 @@ export default function TransactionsList() {
                 <div className="flex min-w-0 flex-col">
                   <span className="app-muted text-xs">
                     {t.date} · {t.category}
+                    {t.paymentMethod && ` · ${t.paymentMethod === "cash" ? "현금" : "카드"}`}
                     {t.source === "receipt" && " · 영수증"}
                   </span>
                   <span className="truncate text-sm">{t.merchant || t.memo || "-"}</span>

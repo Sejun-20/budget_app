@@ -31,7 +31,7 @@ function formatMonthLabel(month: string): string {
   return `${y.slice(2)}.${m}`;
 }
 
-const PAYMENT_COLOR_MAP: Record<string, string> = { 현금: "var(--color-gold)", 카드: "var(--color-primary)" };
+const PAYMENT_COLOR_MAP: Record<string, string> = { 현금: "var(--color-gold-bright)", 카드: "var(--color-primary-soft)" };
 
 export default function Dashboard() {
   const [summary, setSummary] = useState<BalanceSummary | null>(null);

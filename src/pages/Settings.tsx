@@ -2,7 +2,13 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { getApiKey, setApiKey, clearApiKey } from "@/lib/apiKey";
 import { exportBackup, importBackup } from "@/lib/backup";
 import { formatAmountInput, parseAmountInput } from "@/lib/money";
-import { getInitialBalance, hasInitialBalance, setInitialBalance } from "@/lib/settings";
+import {
+  getInitialBalance,
+  hasInitialBalance,
+  setInitialBalance,
+  getDefaultPaymentMethod,
+  setDefaultPaymentMethod,
+} from "@/lib/settings";
 import {
   getIncomeCategories,
   getExpenseCategories,
@@ -28,6 +34,8 @@ export default function Settings() {
   const [balanceInput, setBalanceInput] = useState("");
   const [balanceSaved, setBalanceSaved] = useState(false);
   const [balanceHasValue, setBalanceHasValue] = useState(false);
+
+  const [defaultPaymentMethod, setDefaultPaymentMethodState] = useState<"cash" | "card">("cash");
 
   const [incomeCategories, setIncomeCategories] = useState<string[]>([]);
   const [expenseCategories, setExpenseCategories] = useState<string[]>([]);
@@ -60,7 +68,13 @@ export default function Settings() {
         setBalanceInput(String(await getInitialBalance()));
       }
     })();
+    getDefaultPaymentMethod().then(setDefaultPaymentMethodState);
   }, []);
+
+  async function handleChangeDefaultPaymentMethod(method: "cash" | "card") {
+    setDefaultPaymentMethodState(method);
+    await setDefaultPaymentMethod(method);
+  }
 
   function handleSaveKey(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -169,6 +183,28 @@ export default function Settings() {
           </button>
           {balanceSaved && <p className="text-sm" style={{ color: "var(--color-green)" }}>저장되었습니다.</p>}
         </form>
+      </section>
+
+      <section className="flex flex-col gap-3">
+        <h2 className="app-title text-sm font-semibold">기본 결제수단</h2>
+        <p className="app-muted text-xs">지출 추가/영수증 인식 시 기본으로 선택되는 결제수단입니다.</p>
+        <div className="field flex p-1">
+          {(["cash", "card"] as const).map((m) => (
+            <button
+              key={m}
+              type="button"
+              onClick={() => handleChangeDefaultPaymentMethod(m)}
+              className="flex-1 rounded px-3 py-2 text-sm font-medium"
+              style={
+                defaultPaymentMethod === m
+                  ? { background: "var(--color-primary)", color: "#fff" }
+                  : { color: "var(--color-text-muted)" }
+              }
+            >
+              {m === "cash" ? "현금" : "카드"}
+            </button>
+          ))}
+        </div>
       </section>
 
       <section className="flex flex-col gap-3">

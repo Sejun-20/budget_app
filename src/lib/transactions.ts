@@ -8,7 +8,8 @@ export interface NewTransaction {
   merchant?: string | null;
   memo?: string | null;
   source: "receipt" | "manual";
-  paymentMethod: "cash" | "card";
+  /** Only meaningful for expenses — income has no cash/card distinction. */
+  paymentMethod?: "cash" | "card";
 }
 
 export type Transaction = TransactionRecord;

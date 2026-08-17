@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { getExpenseCategoryNames } from "./categories";
 import { getApiKey } from "./apiKey";
+import { getDefaultPaymentMethod } from "./settings";
 import type { SupportedImageMediaType } from "./image";
 
 const HAIKU_MODEL = "claude-haiku-4-5-20251001";
@@ -24,7 +25,7 @@ export interface ReceiptDraft {
   paymentMethod: "cash" | "card";
 }
 
-function buildExtractTool(categoryNames: string[]): Anthropic.Tool {
+function buildExtractTool(categoryNames: string[], fallbackPaymentMethod: "cash" | "card"): Anthropic.Tool {
   return {
     name: "extract_receipt",
     description: "영수증 사진에서 상호명, 날짜, 총액, 카테고리, 결제수단, 메모를 추출합니다.",
@@ -52,7 +53,9 @@ function buildExtractTool(categoryNames: string[]): Anthropic.Tool {
           type: "string",
           enum: ["cash", "card"],
           description:
-            "결제수단. 영수증에 '카드', '승인번호', 카드사명 등 카드결제 흔적이 있으면 card, '현금(영수증)', '현금결제'처럼 현금 결제임이 명시되어 있으면 cash. 판단이 애매하면 card로 추정.",
+            "결제수단. 영수증에 '카드', '승인번호', 카드사명 등 카드결제 흔적이 있으면 card, '현금', '현금(영수증)', '현금결제'처럼 현금 결제임이 명시되어 있으면 cash. 판단이 애매하면 " +
+            fallbackPaymentMethod +
+            "로 추정.",
         },
         memo: {
           type: "string",
@@ -85,12 +88,13 @@ async function callExtract(
   model: string,
   base64: string,
   mediaType: SupportedImageMediaType,
-  categoryNames: string[]
+  categoryNames: string[],
+  fallbackPaymentMethod: "cash" | "card"
 ): Promise<ReceiptDraft | null> {
   const response = await getClient().messages.create({
     model,
     max_tokens: 1024,
-    tools: [buildExtractTool(categoryNames)],
+    tools: [buildExtractTool(categoryNames, fallbackPaymentMethod)],
     tool_choice: { type: "tool", name: "extract_receipt" },
     messages: [
       {
@@ -125,16 +129,19 @@ export async function extractReceipt(
   base64: string,
   mediaType: SupportedImageMediaType
 ): Promise<ReceiptDraft> {
-  const categoryNames = await getExpenseCategoryNames();
+  const [categoryNames, fallbackPaymentMethod] = await Promise.all([
+    getExpenseCategoryNames(),
+    getDefaultPaymentMethod(),
+  ]);
 
   try {
-    const draft = await callExtract(HAIKU_MODEL, base64, mediaType, categoryNames);
+    const draft = await callExtract(HAIKU_MODEL, base64, mediaType, categoryNames, fallbackPaymentMethod);
     if (draft) return draft;
   } catch {
     // fall through to the fallback model
   }
 
-  const fallbackDraft = await callExtract(FALLBACK_MODEL, base64, mediaType, categoryNames);
+  const fallbackDraft = await callExtract(FALLBACK_MODEL, base64, mediaType, categoryNames, fallbackPaymentMethod);
   if (fallbackDraft) return fallbackDraft;
 
   throw new Error("영수증 정보를 추출하지 못했습니다.");

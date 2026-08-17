@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import PageHeader from "@/components/PageHeader";
 import { getIncomeCategories, getExpenseCategoryNames } from "@/lib/categories";
 import { formatAmountInput, formatWon, parseAmountInput } from "@/lib/money";
+import { getDefaultPaymentMethod } from "@/lib/settings";
 import { insertTransaction } from "@/lib/transactions";
 
 type TxType = "income" | "expense";
@@ -24,7 +25,7 @@ export default function TransactionNew() {
   const [category, setCategory] = useState<string>("");
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState(todayString());
-  const [paymentMethod, setPaymentMethod] = useState<"cash" | "card">("card");
+  const [paymentMethod, setPaymentMethod] = useState<"cash" | "card">("cash");
   const [memo, setMemo] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -36,6 +37,7 @@ export default function TransactionNew() {
       setExpenseCategories(expense);
       setCategory((type === "income" ? income : expense)[0] ?? "");
     });
+    getDefaultPaymentMethod().then(setPaymentMethod);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -76,7 +78,7 @@ export default function TransactionNew() {
         amount: amountNum,
         date,
         memo: memo || null,
-        paymentMethod,
+        paymentMethod: type === "expense" ? paymentMethod : undefined,
       });
       setSuccessMsg(`${type === "income" ? "수입" : "지출"} ${formatWon(amountNum)}이 저장되었습니다.`);
       setAmount("");
@@ -158,24 +160,26 @@ export default function TransactionNew() {
           />
         </label>
 
-        <label className="flex w-full min-w-0 flex-col gap-1 text-sm">
-          결제수단
-          <div className="field flex w-full p-1">
-            {(["cash", "card"] as const).map((m) => (
-              <button
-                key={m}
-                type="button"
-                onClick={() => setPaymentMethod(m)}
-                className="flex-1 rounded px-3 py-2 text-sm font-medium"
-                style={
-                  paymentMethod === m ? { background: "var(--color-primary)", color: "#fff" } : { color: "var(--color-text-muted)" }
-                }
-              >
-                {m === "cash" ? "현금" : "카드"}
-              </button>
-            ))}
-          </div>
-        </label>
+        {type === "expense" && (
+          <label className="flex w-full min-w-0 flex-col gap-1 text-sm">
+            결제수단
+            <div className="field flex w-full p-1">
+              {(["cash", "card"] as const).map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => setPaymentMethod(m)}
+                  className="flex-1 rounded px-3 py-2 text-sm font-medium"
+                  style={
+                    paymentMethod === m ? { background: "var(--color-primary)", color: "#fff" } : { color: "var(--color-text-muted)" }
+                  }
+                >
+                  {m === "cash" ? "현금" : "카드"}
+                </button>
+              ))}
+            </div>
+          </label>
+        )}
 
         <label className="flex w-full min-w-0 flex-col gap-1 text-sm">
           메모
