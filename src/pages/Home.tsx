@@ -117,7 +117,7 @@ export default function Home() {
         </div>
         <div className="flex flex-1 flex-col items-center justify-between text-center">
           <span className="text-2xl leading-none font-bold text-white">{formatDateLine(now)}</span>
-          <span className="text-[22px] font-bold text-white">{formatTimeLine(now)}</span>
+          <span className="text-2xl font-bold text-white">{formatTimeLine(now)}</span>
         </div>
       </header>
 
